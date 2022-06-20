@@ -37,10 +37,7 @@ extension Auth {
     }
     
     // FireAuthにログインするメソッド
-    static func loginWithFireAuth(model: UserModel, completion: @escaping (Bool) -> Void) {
-        guard let email = model.emailString else { return }
-        guard let password = model.passwordString else { return }
-        
+    static func loginWithFireAuth(email: String, password: String, completion: @escaping (Bool) -> Void) {
         // Authにログイン
         Auth.auth().signIn(withEmail: email, password: password) { res, err in
             if let err = err {

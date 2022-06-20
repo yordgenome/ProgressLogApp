@@ -1,46 +1,37 @@
 //
-//  RegisterViewModel.swift
+//  LoginViewModel.swift
 //  WorkoutVolumeDiary
 //
-//  Created by Yo Tahara on 2022/06/19.
+//  Created by Yo Tahara on 2022/06/20.
 //
-
-import Foundation
 
 import Foundation
 import RxSwift
 import RxCocoa
 
-protocol RegisterViewModelInputs {
-    var nameTextInput: AnyObserver<String> { get }
+protocol LoginViewModelInputs {
     var emailTextInput: AnyObserver<String> { get }
     var passwordTextInput: AnyObserver<String> { get }
 }
 
-protocol RegisterViewModelOutputs {
-    var nameTextOutput: PublishSubject<String> { get }
+protocol LoginViewModelOutputs {
     var emailTextOutput: PublishSubject<String> { get }
     var passwordTextOutput: PublishSubject<String> { get }
 }
 
 
-class RegisterViewModel: RegisterViewModelInputs, RegisterViewModelOutputs{
+class LoginViewModel: LoginViewModelInputs, LoginViewModelOutputs{
     
     private let disposeBag = DisposeBag()
     
     // MARK: - Observable
     
-    var nameTextOutput = PublishSubject<String>()
     var emailTextOutput = PublishSubject<String>()
     var passwordTextOutput = PublishSubject<String>()
     
-    var validRegisterSubject = BehaviorSubject<Bool>(value: false)
+    var validLoginSubject = BehaviorSubject<Bool>(value: false)
     
     // MARK: - Observer
-    
-    var nameTextInput: AnyObserver<String> {
-        nameTextOutput.asObserver()
-    }
     
     var emailTextInput: AnyObserver<String> {
         emailTextOutput.asObserver()
@@ -50,19 +41,13 @@ class RegisterViewModel: RegisterViewModelInputs, RegisterViewModelOutputs{
         passwordTextOutput.asObserver()
     }
     
-    var validRegisterDriver: Driver<Bool> = Driver.never()
+    var validLoginDriver: Driver<Bool> = Driver.never()
     
     init() {
         
-        validRegisterDriver = validRegisterSubject
+        validLoginDriver = validLoginSubject
             .asDriver(onErrorDriveWith: Driver.empty())
         
-        let nameValid = nameTextOutput
-            .asObservable()
-            .map { text -> Bool in
-                return text.count >= 2
-            }
-
         let emailValid = emailTextOutput
             .asObservable()
             .map { text -> Bool in
@@ -75,9 +60,9 @@ class RegisterViewModel: RegisterViewModelInputs, RegisterViewModelOutputs{
                 return text.count >= 6
             }
         
-        Observable.combineLatest(nameValid, emailValid, passwordValid ) { $0 && $1 && $2 }
+        Observable.combineLatest(emailValid, passwordValid ) { $0 && $1 }
             .subscribe { validAll in
-                self.validRegisterSubject.onNext(validAll)
+                self.validLoginSubject.onNext(validAll)
             }
             .disposed(by: disposeBag)
     }

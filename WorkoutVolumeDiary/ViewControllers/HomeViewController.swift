@@ -19,6 +19,15 @@ let headerView = MuscleHeaderView()
         
         setupLayout()
         setupBinding()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let signUpVC = SignUpViewController()
+            let nav = UINavigationController(rootViewController: signUpVC)
+            nav.modalPresentationStyle = .fullScreen
+            self.present(nav, animated: true)
+        }
+        
+        
     }
 
     private func setupLayout() {

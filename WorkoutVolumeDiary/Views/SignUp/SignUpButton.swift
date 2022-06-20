@@ -10,10 +10,10 @@ import UIKit
 
 class SignUpButton: UIButton {
     
-    override init(frame: CGRect) {
+    init(text: String) {
         super.init(frame: .zero)
         
-        self.setTitle("登録", for: .normal)
+        self.setTitle(text, for: .normal)
         self.setTitleColor(UIColor.white, for: .normal)
         self.backgroundColor = .uiLightOrange?.withAlphaComponent(0.9)
         self.titleLabel?.font = UIFont(name: "GeezaPro-Bold", size: 18)

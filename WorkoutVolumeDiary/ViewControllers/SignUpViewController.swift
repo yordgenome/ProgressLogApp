@@ -25,11 +25,11 @@ final class SignUpViewController: UIViewController {
     private let passwordLabel = SignUpLabel(text: "パスワード")
     private let emailLabel = SignUpLabel(text: "メールアドレス")
     
-    private let nameTextField = SignUptTextField(placeholder: "名前")
-    private let passwordTextField = SignUptTextField(placeholder: "パスワード")
-    private let emailTextField = SignUptTextField(placeholder: "メールアドレス")
+    private let nameTextField = SignUptTextField(placeholder: "名前", tag: 0, returnKeyType: .next)
+    private let emailTextField = SignUptTextField(placeholder: "メールアドレス", tag: 1, returnKeyType: .next)
+    private let passwordTextField = SignUptTextField(placeholder: "パスワード", tag: 2, returnKeyType: .done)
 
-    private let registerButton = SignUpButton()
+    private let registerButton = SignUpButton(text: "登録")
 
     private let moveToLoginButton: UIButton = {
         let button = UIButton(type: .system)
@@ -53,13 +53,18 @@ final class SignUpViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .gray
+
+        nameTextField.delegate = self
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        
         setupLayout()
         setupBindings()
     }
     
     func setupLayout() {
         addSubViews()
+        passwordTextField.isSecureTextEntry = true
         
         view.addSubview(setButton)
         view.addSubview(getButton)
@@ -75,10 +80,7 @@ final class SignUpViewController: UIViewController {
         passwordTextField.anchor(top: passwordLabel.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 2)
         registerButton.anchor(top: passwordTextField.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 38)
         moveToLoginButton.anchor(top: registerButton.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 50)
-        
-//        registerButton.addTarget(self, action: #selector(tapRegister), for: .touchUpInside)
-        moveToLoginButton.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
-        
+                
         setButton.anchor(bottom: view.bottomAnchor, left: view.leftAnchor, width: 150, height: 50)
         getButton.anchor(bottom: view.bottomAnchor, right: view.rightAnchor, width: 150, height: 50)
 
@@ -123,24 +125,21 @@ final class SignUpViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        //buttonのbindings
         registerButton.rx.tap.asDriver().drive { [weak self] _ in
-            print("registerrrr")
             //登録時の処理
             self?.createUser()
         }
         .disposed(by: disposeBag)
         
         moveToLoginButton.rx.tap.asDriver().drive { [ weak self ] _ in
-            let login = LoginViewController()
-            self?.navigationController?.pushViewController(login, animated: true)
+            let loginVC = LoginViewController()
+            self?.navigationController?.pushViewController(loginVC, animated: true)            
         }
         .disposed(by: disposeBag)
         
-        // viewModelのbinding
         viewModel.validRegisterDriver.drive { validAll in
             self.registerButton.isEnabled = validAll
-            self.registerButton.backgroundColor = validAll ? .uiLightOrange?.withAlphaComponent(0.9) : .init(white: 0.7, alpha: 0.9)
+            self.registerButton.backgroundColor = validAll ? .uiLightOrange?.withAlphaComponent(0.9) : .init(white: 0.9, alpha: 0.9)
         }
         .disposed(by: disposeBag)
     }
@@ -153,7 +152,11 @@ final class SignUpViewController: UIViewController {
         let userInfo = UserModel.init(emailString: emailText, passwordString: passText, nameString: nameText, createdAt: Timestamp(date: Date()))
         
         Auth.createUserToFireAuth(model: userInfo) { success in
-            if !success {
+            if success {
+                print("アカウント登録に成功")
+                self.dismiss(animated: true)
+                
+            } else {
                 let dialog = UIAlertController(title: "登録できません", message: "メールアドレスまたはパスワードが無効です", preferredStyle: .alert)
                 let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
                     self.dismiss(animated: true, completion: nil)
@@ -162,21 +165,19 @@ final class SignUpViewController: UIViewController {
                 self.present(dialog, animated: true, completion: nil)
                 print("アカウント登録に失敗")
             }
-            let homeVC = HomeViewController()
-            homeVC.modalPresentationStyle = .fullScreen
-            self.present(homeVC, animated: true)
-            print("アカウント登録に成功")
         }
+    }
+    
+    func moveToLogin() {
+        let login = LoginViewController()
+//            let nav = UINavigationController(rootViewController: self)
+////            nav.modalPresentationStyle = .fullScreen
+            present(login, animated: true)
+//            nav.pushViewController(login, animated: true)
+//        self.navigationController!.pushViewController(login, animated: true)
         
     }
-    
-    
-    @objc private func tapButton() {
-        let homeVC = HomeViewController()
-        homeVC.modalPresentationStyle = .fullScreen
 
-        self.present(homeVC, animated: true)
-    }
     
     @objc private func set() {
 
@@ -205,28 +206,31 @@ final class SignUpViewController: UIViewController {
             print(#function, workoutArray)
         }
     }
-
     
-//    @objc private func tapRegister(_ sender: Any) {
+}
 
-//
-//        Auth.createUserToFireAuth(model: userInfo) { result in
-//            if result {
-//                let homeVC = HomeViewController()
-//                homeVC.modalPresentationStyle = .fullScreen
-//                self.present(homeVC, animated: true)
-//            }
-//
-//            if !result {
-//                let dialog = UIAlertController(title: "登録できません", message: "メールアドレスまたはパスワードが無効です", preferredStyle: .alert)
-//                let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-//                    self.dismiss(animated: true, completion: nil)
-//                }
-//                dialog.addAction(okAction)
-//                self.present(dialog, animated: true, completion: nil)
-//            }
-//        }
-//
-//    }
+//MARK: - UITextFieldDelegate
+
+extension SignUpViewController: UITextFieldDelegate {
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField.tag {
+        case 0:
+            emailTextField.becomeFirstResponder()
+        case 1:
+            passwordTextField.becomeFirstResponder()
+        case 2:
+            passwordTextField.resignFirstResponder()
+            
+        default:
+            break
+        }
+        return true
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+        
+    }
+
 }

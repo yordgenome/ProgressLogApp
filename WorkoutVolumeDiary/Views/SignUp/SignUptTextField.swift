@@ -10,11 +10,13 @@ import UIKit
 
 class SignUptTextField: UITextField {
     
-    init(placeholder: String){
+    init(placeholder: String, tag: Int, returnKeyType: UIReturnKeyType){
         super.init(frame: .zero)
         self.placeholder = placeholder
             self.borderStyle = .roundedRect
             self.backgroundColor = .white
+        self.tag = tag
+        self.returnKeyType = returnKeyType
     }
     
     required init?(coder: NSCoder) {
