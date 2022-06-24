@@ -7,10 +7,10 @@
 
 import UIKit
 
-class TrainingLogTableViewCell: UITableViewCell {
+class WorkoutTableViewCell: UITableViewCell {
 //MARK: - Properties
     
-    static let identifier = "TrainingLogTableViewCell"
+    static let identifier = "WorkoutTableViewCell"
         
 //MARK: - UIParts
     
@@ -144,7 +144,7 @@ class TreLogTableViewLabel: UILabel {
         self.addBorder(width: borderWidth, color: borderColor, position: borderPosition)
         self.textColor = textColor
         self.text = text
-        self.font = UIFont(name: "SinhalaSangamMN", size: 16)
+        self.font = UIFont(name: "GeezaPro", size: 16)
         self.textAlignment = textAlignment
     }
     
@@ -164,7 +164,7 @@ class RepsTableViewCell: UITableViewCell {
         label.layer.masksToBounds = true
         label.backgroundColor = .clear
         label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "SinhalaSangamMN", size: 10)
+        label.font = UIFont(name: "GeezaPro", size: 10)
         label.textAlignment = .center
         label.backgroundColor = .systemPink
 
@@ -176,7 +176,7 @@ class RepsTableViewCell: UITableViewCell {
         label.layer.masksToBounds = true
         label.backgroundColor = .clear
         label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "SinhalaSangamMN", size: 10)
+        label.font = UIFont(name: "GeezaPro", size: 10)
         label.textAlignment = .center
         label.text = "×"
         label.backgroundColor = .systemPink
@@ -189,7 +189,7 @@ class RepsTableViewCell: UITableViewCell {
         label.layer.masksToBounds = true
         label.backgroundColor = .clear
         label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "SinhalaSangamMN", size: 10)
+        label.font = UIFont(name: "GeezaPro", size: 10)
         label.textAlignment = .center
         label.backgroundColor = .systemPink
 
@@ -201,7 +201,7 @@ class RepsTableViewCell: UITableViewCell {
         label.layer.masksToBounds = true
         label.backgroundColor = .clear
         label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "SinhalaSangamMN", size: 10)
+        label.font = UIFont(name: "GeezaPro", size: 10)
         label.textAlignment = .center
         label.text = "="
         label.backgroundColor = .systemPink
@@ -214,7 +214,7 @@ class RepsTableViewCell: UITableViewCell {
         label.layer.masksToBounds = true
         label.backgroundColor = .clear
         label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "SinhalaSangamMN", size: 10)
+        label.font = UIFont(name: "GeezaPro", size: 10)
         label.textAlignment = .center
         label.backgroundColor = .systemPink
 

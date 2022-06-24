@@ -13,10 +13,12 @@ class SignUptTextField: UITextField {
     init(placeholder: String, tag: Int, returnKeyType: UIReturnKeyType){
         super.init(frame: .zero)
         self.placeholder = placeholder
-            self.borderStyle = .roundedRect
-            self.backgroundColor = .white
+        self.borderStyle = .roundedRect
+        self.backgroundColor = .white
         self.tag = tag
         self.returnKeyType = returnKeyType
+        if #available(iOS 12.0, *) { self.textContentType = .oneTimeCode }
+        
     }
     
     required init?(coder: NSCoder) {

@@ -13,6 +13,8 @@ import RxCocoa
 
 final class SignUpViewController: UIViewController {
     
+    private var workoutArray: [WorkoutModel] = []
+    
     let disposeBag = DisposeBag()
     private let viewModel = RegisterViewModel()
     
@@ -65,6 +67,7 @@ final class SignUpViewController: UIViewController {
     func setupLayout() {
         addSubViews()
         passwordTextField.isSecureTextEntry = true
+        if #available(iOS 12.0, *) { passwordTextField.textContentType = .oneTimeCode }
         
         view.addSubview(setButton)
         view.addSubview(getButton)
@@ -127,7 +130,7 @@ final class SignUpViewController: UIViewController {
         
         registerButton.rx.tap.asDriver().drive { [weak self] _ in
             //登録時の処理
-            self?.createUser()
+            Task {await self?.createUser()}
         }
         .disposed(by: disposeBag)
         
@@ -144,66 +147,61 @@ final class SignUpViewController: UIViewController {
         .disposed(by: disposeBag)
     }
     
-    private func createUser() {
-        guard let emailText = emailTextField.text,
-              let nameText = nameTextField.text,
-              let passText = passwordTextField.text else { return }
-        
-        let userInfo = UserModel.init(emailString: emailText, passwordString: passText, nameString: nameText, createdAt: Timestamp(date: Date()))
-        
-        Auth.createUserToFireAuth(model: userInfo) { success in
-            if success {
-                print("アカウント登録に成功")
-                self.dismiss(animated: true)
-                
-            } else {
-                let dialog = UIAlertController(title: "登録できません", message: "メールアドレスまたはパスワードが無効です", preferredStyle: .alert)
-                let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                    self.dismiss(animated: true, completion: nil)
-                }
-                dialog.addAction(okAction)
-                self.present(dialog, animated: true, completion: nil)
-                print("アカウント登録に失敗")
-            }
+    private func createUser() async {
+        guard let email = emailTextField.text,
+              let name = nameTextField.text,
+              let password = passwordTextField.text else { return }
+        let message = await UserModel.signUpAndGetError(name: name, email: email, password: password)
+        if message == "アカウント登録が完了しました" {
+            dismiss(animated: true)
+        } else {
+            showAlert(title: "アカウント登録に失敗しました", message: message)
         }
     }
+
+    private func showAlert(title: String, message: String?) {
+        print(#function)
+        let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "OK", style: .default,handler: nil))
+        self.present(alertVC, animated: true, completion: nil)
+    }
+    
     
     func moveToLogin() {
         let login = LoginViewController()
-//            let nav = UINavigationController(rootViewController: self)
-////            nav.modalPresentationStyle = .fullScreen
-            present(login, animated: true)
-//            nav.pushViewController(login, animated: true)
-//        self.navigationController!.pushViewController(login, animated: true)
+        //            let nav = UINavigationController(rootViewController: self)
+        ////            nav.modalPresentationStyle = .fullScreen
+        present(login, animated: true)
+        //            nav.pushViewController(login, animated: true)
+        //        self.navigationController!.pushViewController(login, animated: true)
         
     }
 
     
-    @objc private func set() {
-
-        let workout: [WorkoutModel] = [WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 10, volume: 600),
-                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 8, volume: 600),
-                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 5, volume: 600)]
-
-        let dateSring = DateUtils.toStringFromDate(date: Date())
+    @objc private func set() async {
         
-        Firestore.setWorkoutToFirestore(dateString: dateSring, workout: workout) { success in
-            if success {
-                print("成功", #function)
-            } else {
-                print("失敗", #function)
-            }
+        let workout: [WorkoutModel] = [WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 10, volume: 600),
+                                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 8, volume: 600),
+                                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 5, volume: 600)]
+        
+        do {
+            try await UserModel.setWorkoutToFirestore(workout: workout)
+            print("ワークアウトの登録に成功")
+
+        } catch {
+            print("ワークアウトの登録に失敗", error)
         }
     }
     
-    @objc private func get() {
 
-        let uid = Auth.auth().currentUser?.uid
-        let dateString = DateUtils.toStringFromDate(date: Date())
-        Firestore.fetchWorkoutFromFirestore(uid: "EzUV2ql6NgRD3lq6ckD4DdRHPH82", dateString: dateString, targetPart: .chest){ workoutArray in
-            
+    @objc private func get() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
-            print(#function, workoutArray)
+        do {
+            workoutArray = try await UserModel.getWorkoutFromFirestore(uid: uid)
+            print("ワークアウトの取得に成功", workoutArray)
+        } catch {
+            print("ワークアウトの取得に失敗", error)
         }
     }
     

@@ -23,14 +23,7 @@ extension UIColor{
     static let appDavysGray = UIColor(hex: "5C5C5A")
     static let appCMikadoYellow = UIColor(hex: "DDDAB2")
     static let appAlabaster = UIColor(hex: "F3EDE9")
-    static let appPaleSilver = UIColor(hex: "CAC4B5")
-    
-//    static let appRoseGold = UIColor(hex: "AD687B")
-//    static let appAmericanBlue = UIColor(hex: "4B406C")
-//    static let appEcru = UIColor(hex: "CCBD77")
-//    static let appCookiesAndCream = UIColor(hex: "DDDAB2")
-//    static let appEnglishRed = UIColor(hex: "A14752")
-    
+    static let appPaleSilver = UIColor(hex: "CAC4B5")    
 
 convenience init?(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)

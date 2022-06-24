@@ -6,53 +6,110 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
+import RxSwift
+import RxCocoa
+import PKHUD
 
 class HomeViewController: UIViewController {
 
-//MARK: - Properties
-let gradientView = GradientView()
-let footerView = MuscleFooterView()
-let headerView = MuscleHeaderView()
+    //MARK: - Properties
+    let gradientView = GradientView()
+    let footerView = MuscleFooterView()
+    
+    var user: User?
+    let today = Date()
+
+    let disposeBag = DisposeBag()
+    
+    let logoutButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.backgroundColor = .red
+        button.setTitle("logout", for: .normal)
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupLayout()
         setupBinding()
+}
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        Firestore.firestore().collection("users").document(uid).getDocument(completion: { document, error in
+            if let document = document {
+                let name = document.data()!["name"] as! String
+                let email = document.data()!["email"] as! String
+                let createdAt = document.data()!["createdAt"] as! Timestamp
+                
+                self.user = User(id: uid, name: name, email: email, createdAt: createdAt)
+                print("ユーザー情報の取得に成功", self.user)
+            }
+            if error != nil {
+                print("ユーザー情報の取得に失敗", error)
+            }
+        })
+    }
+
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if Auth.auth().currentUser?.uid == nil {
             let signUpVC = SignUpViewController()
             let nav = UINavigationController(rootViewController: signUpVC)
             nav.modalPresentationStyle = .fullScreen
             self.present(nav, animated: true)
         }
         
-        
     }
-
+    
     private func setupLayout() {
         view.addSubview(gradientView)
         view.addSubview(footerView)
-        view.addSubview(headerView)
+        view.addSubview(logoutButton)
         gradientView.frame = view.bounds
-        headerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 80, topPadding: 20)
         footerView.anchor(bottom: view.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 80)
-
+        logoutButton.anchor(top: view.bottomAnchor, right: view.rightAnchor, width: 100, height: 50)
     }
     
     private func setupBinding() {
         footerView.workoutView.button?.addTarget(self, action: #selector(workoutAction), for: .touchUpInside)
+
         
+        logoutButton.addTarget(self, action: #selector(logout), for: .touchUpInside)
+    }
+    
+    @objc private func logout() {
+        do {
+            try Auth.auth().signOut()
+            let signUpVC = SignUpViewController()
+            let nav = UINavigationController(rootViewController: signUpVC)
+            nav.modalPresentationStyle = .fullScreen
+            self.present(nav, animated: true)
+        } catch {
+            print("ログアウトに失敗", error)
+        }
         
     }
     
+    
     @objc private func workoutAction() {
-        let vc = TrainingLogController()
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true)
-        print(#function)    }
+        let workoutVC = WorkoutViewController()
+        workoutVC.modalPresentationStyle = .fullScreen
+        self.present(workoutVC, animated: true)
+        print(#function)
+        
+    }
     
 }
+
+
 
 
 
