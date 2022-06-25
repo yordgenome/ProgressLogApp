@@ -10,7 +10,7 @@ import UIKit
 
 class MuscleHeaderView: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
-    private let muscleArray = ["全身", "胸", "背中", "腕", "肩", "腹", "脚", "その他"]
+    private let muscleArray = ["全身", "胸", "背中", "", "肩", "腹", "脚", "その他"]
     
     var cellItemsWidth: CGFloat = 0.0
     

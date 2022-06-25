@@ -24,17 +24,4 @@ class DateUtils {
         formatter.dateFormat = format
         return formatter.string(from: date)
     }
-    
-    class func toTargetPartg(_targetPart: String) -> TargetPart {
-        switch _targetPart {
-        case "chest": return .chest
-        case "shoulder": return .shoulder
-        case "back": return .back
-        case "arm": return .arm
-        case "abs": return .abs
-        case "leg": return .leg
-        case "others": return .others
-        default: return .others
-        }
-    }
 }

@@ -17,7 +17,7 @@ class MuscleFooterView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .uiLightOrange!.withAlphaComponent(0.9)
+        backgroundColor = .gold
 
 
         let baseStackView = UIStackView(arrangedSubviews: [homeView, chartView, workoutView, menuView, boostView])

@@ -51,7 +51,7 @@ class SetworkoutViewModel: SetWorkoutViewModelInputs, SetWorkoutViewModelOutputs
     }
     
     var repsTextInput: AnyObserver<String> {
-        weightTextOutput.asObserver()
+        repsTextOutput.asObserver()
     }
     
     var validRegisterDriver: Driver<Bool> = Driver.never()

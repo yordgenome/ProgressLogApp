@@ -49,40 +49,43 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
         return label
     }()
     
+    let targetPartTextField: UITextField = {
+        let textField = UITextField()
+        textField.tag = 0
+        textField.placeholder = "ターゲット部位"
+        textField.borderStyle = .roundedRect
+        textField.textColor = .endColor
+        return textField
+    }()
+    
     let workoutNameTextField: UITextField = {
         let textField = UITextField()
+        textField.tag = 1
         textField.placeholder = "トレーニングメニュー"
         textField.borderStyle = .roundedRect
         textField.textColor = .endColor
         textField.isEnabled = true
         return textField
     }()
-    
-    let targetPartTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "ターゲット部位"
-        textField.borderStyle = .roundedRect
-        textField.textColor = .endColor
 
-        return textField
-    }()
     
     let weightTextField: UITextField = {
         let textField = UITextField()
+        textField.tag = 2
         textField.placeholder = "重量"
         textField.borderStyle = .roundedRect
         textField.textColor = .endColor
-        textField.keyboardType = .numberPad
-        
+        textField.keyboardType = .decimalPad
         return textField
     }()
     
     let repsTextField: UITextField = {
         let textField = UITextField()
+        textField.tag = 3
         textField.placeholder = "レップ数"
         textField.borderStyle = .roundedRect
         textField.textColor = .endColor
-        textField.keyboardType = .numberPad
+        textField.keyboardType = .decimalPad
         return textField
     }()
     

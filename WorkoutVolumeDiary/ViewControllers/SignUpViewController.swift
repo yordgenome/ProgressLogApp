@@ -169,12 +169,7 @@ final class SignUpViewController: UIViewController {
     
     func moveToLogin() {
         let login = LoginViewController()
-        //            let nav = UINavigationController(rootViewController: self)
-        ////            nav.modalPresentationStyle = .fullScreen
-        present(login, animated: true)
-        //            nav.pushViewController(login, animated: true)
-        //        self.navigationController!.pushViewController(login, animated: true)
-        
+        present(login, animated: true)        
     }
 
     

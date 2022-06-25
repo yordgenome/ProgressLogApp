@@ -78,7 +78,7 @@ public enum TargetPart {
 
 class TargetPartUtils {
     
-    class func toTargetPartg(_ targetPart: String) -> TargetPart {
+    class func toTargetPart(_ targetPart: String) -> TargetPart {
         switch targetPart {
         case "chest": return .chest
         case "shoulder": return .shoulder

@@ -102,7 +102,7 @@ final class DatePickView: UIView, UITextFieldDelegate {
     }
     
     private func setupLayout() {
-        backgroundColor = .uiLightOrange?.withAlphaComponent(0.9)
+        backgroundColor = .gold
 //        layer.borderColor = UIColor.appDavysGray?.cgColor
 //        layer.borderWidth = 2
         

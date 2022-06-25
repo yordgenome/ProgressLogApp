@@ -201,7 +201,7 @@ class UserModel {
         
         for document in mapData {
             let workoutName: String = document.data()["workoutName"] as! String
-            let targetPart: TargetPart = TargetPartUtils.toTargetPartg(document.data()["targetPart"] as! String)
+            let targetPart: TargetPart = TargetPartUtils.toTargetPart(document.data()["targetPart"] as! String)
             let doneAt: Timestamp = document.data()["doneAt"] as! Timestamp
             let weight: Double = document.data()["weight"] as! Double
             let reps: Double = document.data()["reps"] as! Double
