@@ -17,8 +17,7 @@ final class WorkoutViewController: UIViewController {
 //    private var workoutMenu = WorkoutMenuModel()
     
     private let viewModel = SetworkoutViewModel()
-    let gradientView = GradientView()
-    
+    private let gradientView = GradientView()
     private let footerView = MuscleFooterView()
     private let headerView = DatePickView()
     private let setWorkoutView = SetWorkoutView()
@@ -35,11 +34,13 @@ final class WorkoutViewController: UIViewController {
                        "ショルダープレス"
     ]
     
-    private let targetParts = ["胸", "背", "肩", "腕", "腹", "脚"]
+    private let targetParts = ["胸", "背", "肩", "腕", "腹", "脚", "他"]
     
     var workoutData: [WorkoutModel] = []
     
-    private let trainingLogTableView: UITableView = {
+    var currentDate: Date?
+      
+    private let workoutTableView: UITableView = {
         let tv = UITableView.init(frame: .zero, style: .grouped)
         tv.register(WorkoutTableViewCell.self, forCellReuseIdentifier: WorkoutTableViewCell.identifier)
         tv.backgroundColor = .clear
@@ -51,9 +52,13 @@ final class WorkoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+  
+        currentDate = DateUtils.toDateFromString(string: headerView.dateTextField.text!)
         
-        trainingLogTableView.delegate = self
-        trainingLogTableView.dataSource = self
+        
+        print("currentDate:", currentDate!)
+        workoutTableView.delegate = self
+        workoutTableView.dataSource = self
 
         setupLayout()
         setupBindings()
@@ -63,25 +68,63 @@ final class WorkoutViewController: UIViewController {
         view.addSubview(gradientView)
         view.addSubview(headerView)
         view.addSubview(setWorkoutView)
-        view.addSubview(trainingLogTableView)
+        view.addSubview(workoutTableView)
         view.addSubview(footerView)
         
         gradientView.frame = view.bounds
         headerView.anchor(top: view.topAnchor, centerX: view.centerXAnchor, width: view.frame.width+4, height: 80)
         setWorkoutView.anchor(top: headerView.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 100)
-        trainingLogTableView.anchor(top: setWorkoutView.bottomAnchor, left: view.leftAnchor, right: view.rightAnchor, width: view.bounds.width-20, height: view.bounds.height-50, topPadding: 20, leftPadding: 10, rightPadding:  10)
+        workoutTableView.anchor(top: setWorkoutView.bottomAnchor, left: view.leftAnchor, right: view.rightAnchor, width: view.bounds.width-20, height: view.bounds.height-50, topPadding: 20, leftPadding: 10, rightPadding:  10)
         footerView.anchor(bottom: view.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 80)
-        
-//        headerView.nextDayButton.addTarget(self, action: #selector(test), for: .touchUpInside)
-        
     }
-    
+
+//MARK: - Bindings
     private func setupBindings() {
         
         SetupTextFields()
+        // 日付処理
+        headerView.dateTextField.rx.text.asDriver().drive { [weak self] text in
+            guard let self = self else { return }
+            self.currentDate = DateUtils.toDateFromString(string: text!)
+//            let data: [WorkoutModel] = []
+//            Task {try await UserModel.setWorkoutToFirestore(workout: data, dateString: DateUtils.toStringFromDate(date: self.currentDate!))}
+            print("currentDate:", self.currentDate!)
+        }
+        .disposed(by: disposeBag)
         
+        headerView.previousDayButton.rx.tap.asDriver().drive { [weak self] _ in
+            guard let self = self else { return }
+            self.currentDate = Calendar.current.date(byAdding: .day, value: -1, to: self.currentDate!)!
+            self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
+            print("currentDate:", self.currentDate!)
+        }.disposed(by: disposeBag)
+
+        headerView.nextDayButton.rx.tap.asDriver().drive { [weak self] _ in
+            guard let self = self else { return }
+            if self.currentDate == DateUtils.toDateFromString(string: DateUtils.toStringFromDate(date: Date())) {
+                print("currentDate:", self.currentDate!)
+                return
+            } else {
+                self.currentDate = Calendar.current.date(byAdding: .day, value: 1, to: self.currentDate!)!
+                self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
+                print("currentDate:", self.currentDate!)
+            }
+        }.disposed(by: disposeBag)
+        
+        // ワークアウト登録
         setWorkoutView.setButton.rx.tap.asDriver().drive {[ weak self ] _ in
-            print(#function)
+            guard let self = self else { return }
+            let targetPart = TargetPartUtils.toTargetPart(self.setWorkoutView.targetPartTextField.text!)
+            let workoutName = self.setWorkoutView.workoutNameTextField.text!
+            let weight = Double(self.setWorkoutView.weightTextField.text!)!
+            let reps = Double(self.setWorkoutView.repsTextField.text!)!
+            let workout = WorkoutModel(doneAt: Timestamp(date: self.currentDate!), targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: weight*reps)
+            self.workoutData.append(workout)
+            self.workoutTableView.reloadData()
+            print(self.workoutData)
+            Task { do { try await UserModel.setWorkoutToFirestore(workout: self.workoutData, dateString: DateUtils.toStringFromDate(date: self.currentDate!))
+            } catch { print("ワークアウトの登録に失敗") }
+            }
         }.disposed(by: disposeBag)
 
         
@@ -121,14 +164,11 @@ final class WorkoutViewController: UIViewController {
         .disposed(by: disposeBag)
         
         footerView.homeView.button?.rx.tap.asDriver().drive { [ weak self ] _ in
-            
-            print(#function)
             let homeVC = HomeViewController()
             homeVC.modalPresentationStyle = .fullScreen
             self?.present(homeVC, animated: true)
         }
         .disposed(by: disposeBag)
-        
                                                  
     }
     
@@ -189,7 +229,6 @@ final class WorkoutViewController: UIViewController {
     //MARK: - UITextFieldDelegate
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
-        WorkoutViewController().view.endEditing(true)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -207,88 +246,13 @@ final class WorkoutViewController: UIViewController {
         }
         return true
     }
-    
-    
-//    @objc func test() {
-//
-//        let dateString  = headerView.dateTextField.text!
-//        let alert = UIAlertController(title: "\(dateString) ", message: "トレーニングを記録", preferredStyle: .alert)
-//        //OKボタンを生成
-//        let okAction = UIAlertAction(title: "登録", style: .default) { (action:UIAlertAction) in
-//
-//            guard let textFields:[UITextField] = alert.textFields else {return}
-//
-//            let workoutName = textFields[1].text ?? "ベンチプレス"
-//            let targetPart = TargetPartUtils.toTargetPart(textFields[2].text!)
-//            let weight = Double(textFields[3].text!) ?? 1
-//            let reps = Double(textFields[4].text!) ?? 1
-//            let workout = WorkoutModel(doneAt: Timestamp(), targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: weight*reps)
-//            self.workoutData.append(workout)
-//            self.dismiss(animated: true)
-//            }
-//        //OKボタンを追加
-//        alert.addAction(okAction)
-//
-//        //Cancelボタンを生成
-//        let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel, handler: nil)
-//        //Cancelボタンを追加
-//        alert.addAction(cancelAction)
-//
-//        alert.addTextField { (text:UITextField!) in
-//            let pickerView = UIPickerView()
-//            pickerView.delegate = self
-//            pickerView.dataSource = self
-//            text.inputView = pickerView
-//            // toolbar
-//            let toolbar = UIToolbar()
-//            toolbar.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44)
-//            let doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.donePicker))
-//            toolbar.setItems([doneButtonItem], animated: true)
-//            text.inputAccessoryView = toolbar
-//
-//            text.placeholder = "メニュー"
-//            text.tag = 1
-//        }
-//
-//        alert.addTextField { (text:UITextField!) in
-//            text.placeholder = "ターゲット部位"
-//            text.tag = 2
-//        }
-//        alert.addTextField { (text:UITextField!) in
-//            text.placeholder = "重量(kg)"
-//            text.keyboardType = .numberPad
-//            text.tag = 3
-//        }
-//        alert.addTextField { (text:UITextField!) in
-//            text.placeholder = "レップ数"
-//            text.keyboardType = .numberPad
-//            text.tag = 4
-//        }
-//
-//        present(alert, animated: true)
-//    }
-    
-
-//    @objc func donePicker(tf : UITextField) {
-//        tf.endEditing(true)
-//        dismiss(animated: true)
-//    }
-    
-
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        textField.endEditing(true)
-//    }
-    
-    
 }
-
-
 
 //MARK: - UITableViewDelegate, UITableViewDataSource
 extension WorkoutViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 130
+        return 80
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -303,12 +267,11 @@ extension WorkoutViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: WorkoutTableViewCell.identifier, for: indexPath) as! WorkoutTableViewCell
         cell.menuLabel.text = workoutData[indexPath.section].workoutName
-        cell.targetPartLabel.text = workoutData[indexPath.section].workoutName
+        cell.targetPartLabel.text = workoutData[indexPath.section].targetPart.toString()
+        cell.weightLabel.text = workoutData[indexPath.section].weight.description
+        cell.repsLabel.text = workoutData[indexPath.section].reps.description
         cell.selectionStyle = .none
         
-        cell.addLogButton.tag = indexPath.section
-
-        cell.repsTableView.reloadData()
         return cell
     }
         
@@ -333,43 +296,28 @@ extension WorkoutViewController: UITableViewDelegate, UITableViewDataSource {
         return marginView
     }
     
-    
-    
-
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-
-
-        let editAction = UIContextualAction(style: .normal, title: "編集") { (action, view, completionHandler) in
-            // 編集処理を記述
-            print("Editがタップされた")
-            //            tableView.reloadData()
-            completionHandler(true)
-        }
-
-
+        
         let deleteAction = UIContextualAction(style: .destructive, title: "削除") {action, view, completionHandler in
-
-                        let alert = UIAlertController(title: "確認", message: "選択中のデータを削除しますか?", preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "削除", style: .destructive, handler: { _ in
-
-                            // 配列から削除
-                            self.workoutData.remove(at: indexPath.section)
-                            // セルから削除
-                            let indexSet = NSMutableIndexSet()
-                                    indexSet.add(indexPath.section)
-                            tableView.deleteSections(indexSet as IndexSet, with: .fade)
-                            
-                        }))
-                        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-                        self.present(alert, animated: true, completion: nil)
+            
+            let alert = UIAlertController(title: "確認", message: "選択中のデータを削除しますか?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "削除", style: .destructive, handler: { _ in
+                // 配列から削除
+                self.workoutData.remove(at: indexPath.section)
+                // セルから削除
+                let indexSet = NSMutableIndexSet()
+                indexSet.add(indexPath.section)
+                tableView.deleteSections(indexSet as IndexSet, with: .fade)
+                
+            }))
+            alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
             completionHandler(true)
-
-                    }
-        editAction.backgroundColor = UIColor.endColor
-        
-        return UISwipeActionsConfiguration(actions: [deleteAction, editAction])
-      }
-        
+            
+        }
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
 }
 
 

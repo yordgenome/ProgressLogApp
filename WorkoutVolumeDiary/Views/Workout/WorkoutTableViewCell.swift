@@ -15,30 +15,37 @@ class WorkoutTableViewCell: UITableViewCell {
 //MARK: - UIParts
     
     let menuLabel = TreLogTableViewLabel(maskedCorner: [],
-                                         backgroundColor: (UIColor.uiLightOrange?.withAlphaComponent(0.9))!,
+                                         backgroundColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                          textColor: .white,
                                          textAlignment: .left)
     
     let targetPartLabel = TreLogTableViewLabel(maskedCorner: [.layerMinXMinYCorner],
                                                backgroundColor: .white.withAlphaComponent(0.9),
-                                               textColor: (UIColor.uiLightOrange?.withAlphaComponent(0.9))!,
+                                               textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                                textAlignment: .center)
 
     let volumeTextLabel = TreLogTableViewLabel(maskedCorner: [],
                                                backgroundColor: .white.withAlphaComponent(0.9),
-                                               textColor: (UIColor.uiLightOrange?.withAlphaComponent(0.9))!,
+                                               textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                                textAlignment: .center,
                                                text: "総負荷")
     
     let TotalVolumeLabel = TreLogTableViewLabel(maskedCorner: [],
                                            backgroundColor: .white.withAlphaComponent(0.9),
-                                           textColor: (UIColor.uiLightOrange?.withAlphaComponent(0.9))!,
+                                           textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                            textAlignment: .left)
-
-    let spacerLabel = TreLogTableViewLabel(maskedCorner: [.layerMaxXMaxYCorner],
-                                           backgroundColor: (.uiLightOrange?)!,
-                                           textColor: (UIColor.uiLightOrange?.withAlphaComponent(0.9))!,
-                                           textAlignment: .left)
+    let weightLabel = TreLogTableViewLabel(maskedCorner: [],
+                                           backgroundColor: .clear,
+                                           textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
+                                           textAlignment: .center)
+    let batsuLabel = TreLogTableViewLabel(maskedCorner: [],
+                                           backgroundColor: .clear,
+                                           textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
+                                           textAlignment: .center)
+    let repsLabel = TreLogTableViewLabel(maskedCorner: [],
+                                           backgroundColor: .clear,
+                                           textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
+                                           textAlignment: .center)
   
     let addLogButton: UIButton = {
         let button = UIButton(type: .system)
@@ -46,15 +53,10 @@ class WorkoutTableViewCell: UITableViewCell {
         button.tintColor = .endColor
         button.layer.cornerRadius = 10
         button.layer.maskedCorners = [.layerMaxXMinYCorner]
-        button.layer.backgroundColor = UIColor.uiLightOrange?.withAlphaComponent(0.9).cgColor
+        button.layer.backgroundColor = UIColor.gold?.withAlphaComponent(0.9).cgColor
         return button
     }()
     
-    let repsTableView: UITableView = {
-       let tableView = UITableView()
-        tableView.register(RepsTableViewCell.self, forCellReuseIdentifier: RepsTableViewCell.identifier)
-        return tableView
-    }()
     
 //MARK: - LifeCycles
     
@@ -62,24 +64,21 @@ class WorkoutTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.contentView.layer.cornerRadius = 10
 
-//        repsTableView.dataSource = self
+        batsuLabel.text = "×"
         setupLayout()
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        layer.borderColor = UIColor.uiLightOrange?.cgColor
+        layer.borderColor = UIColor.gold?.cgColor
         layer.borderWidth = 2
         layer.cornerRadius = 10
-        backgroundColor = .clear
+        backgroundColor = .white
         
-        targetPartLabel.addBorder(width: 2, color: (.uiLightOrange?.withAlphaComponent(0.9))!, position: .bottomRight)
-        volumeTextLabel.addBorder(width: 2, color: (.uiLightOrange?.withAlphaComponent(0.9))!, position: .bottomRight)
-        TotalVolumeLabel.addBorder(width: 2, color: (.uiLightOrange?.withAlphaComponent(0.9))!, position: .bottom)
+        targetPartLabel.addBorder(width: 2, color: (.gold?.withAlphaComponent(0.9))!, position: .bottomRight)
+        volumeTextLabel.addBorder(width: 2, color: (.gold?.withAlphaComponent(0.9))!, position: .bottomRight)
+        TotalVolumeLabel.addBorder(width: 2, color: (.gold?.withAlphaComponent(0.9))!, position: .bottom)
         
-        repsTableView.backgroundColor = .white.withAlphaComponent(0.9)
-        repsTableView.layer.cornerRadius = 10
-        repsTableView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
     }
     
     func setupLayout() {
@@ -89,13 +88,18 @@ class WorkoutTableViewCell: UITableViewCell {
         addSubview(TotalVolumeLabel)
         addSubview(volumeTextLabel)
         addSubview(addLogButton)
-        addSubview(repsTableView)
+        addSubview(weightLabel)
+        addSubview(batsuLabel)
+        addSubview(repsLabel)
         targetPartLabel.anchor(top: topAnchor, left: leftAnchor, width: 50, height: 45)
         menuLabel.anchor(top: topAnchor, left: targetPartLabel.rightAnchor, right: addLogButton.leftAnchor, height: 25)
         addLogButton.anchor(top: topAnchor, right: rightAnchor, width: 45, height: 45)
         volumeTextLabel.anchor(top: menuLabel.bottomAnchor, left: targetPartLabel.rightAnchor, right: TotalVolumeLabel.leftAnchor, height: 20)
         TotalVolumeLabel.anchor(top: menuLabel.bottomAnchor, right: addLogButton.leftAnchor, width: (bounds.width-115)/2, height: 20)
-        repsTableView.anchor(top: targetPartLabel.bottomAnchor, bottom: bottomAnchor, left: leftAnchor, right: rightAnchor)
+        weightLabel.anchor(top: targetPartLabel.bottomAnchor, left: leftAnchor, width: 60, height: 20, topPadding: 5, leftPadding: 40)
+        batsuLabel.anchor(top: weightLabel.topAnchor, left: weightLabel.rightAnchor, width: 20, height: 20, leftPadding: 20)
+        repsLabel.anchor(top: weightLabel.topAnchor, left: batsuLabel.rightAnchor, width: 60, height: 20, leftPadding: 20)
+
 
         
     }
@@ -105,25 +109,6 @@ class WorkoutTableViewCell: UITableViewCell {
     }
     
 }
-
-//MARK: - UITableViewDelegate, UITableViewDataSource
-
-//extension TrainingLogTableViewCell: UITableViewDelegate, UITableViewDataSource {
-//
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return repsWeightArray.count
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: RepsTableViewCell.identifier, for: indexPath) as! RepsTableViewCell
-//        cell.weightLabel.text = repsWeightArray[indexPath.row].weight.description
-//        cell.repsLabel.text = repsWeightArray[indexPath.row].reps.description
-//        cell.volumeLabel.text = String(repsWeightArray[indexPath.row].weight * repsWeightArray[indexPath.row].reps)
-//        return cell
-//    }
-//
-//}
-
 
 //MARK: - TreLogTableViewLabel
 class TreLogTableViewLabel: UILabel {

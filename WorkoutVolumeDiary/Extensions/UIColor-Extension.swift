@@ -16,7 +16,7 @@ extension UIColor{
     static let startColor = UIColor(hex: "#00172D")
     static let endColor = UIColor(hex: "#0052A2")
 
-    static let gold = UIColor(hex: "#ddbf5f")
+    static let gold = UIColor(hex: "#A57C01")
 
     
     

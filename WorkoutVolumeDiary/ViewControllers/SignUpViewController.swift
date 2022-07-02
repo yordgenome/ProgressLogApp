@@ -180,7 +180,7 @@ final class SignUpViewController: UIViewController {
                                        WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 5, volume: 600)]
         
         do {
-            try await UserModel.setWorkoutToFirestore(workout: workout)
+            try await UserModel.setWorkoutToFirestore(workout: workout, dateString: DateUtils.toStringFromDate(date: Date()))
             print("ワークアウトの登録に成功")
 
         } catch {

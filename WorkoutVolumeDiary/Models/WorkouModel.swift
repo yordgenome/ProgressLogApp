@@ -34,14 +34,16 @@ struct WorkoutModel {
         self.volume = weight * reps
     }
     
-//    func toDictionary() -> [String: Any] {
-//        return [
-//            "date": doneAt,
-//            "workoutName" : workoutName,
-//            "targetPart" : targetPart,
-//            "sets": sets
-//        ]
-//    }
+    func toDictionary() -> [String: Any] {
+        return [
+            "doneAt": doneAt,
+            "targetPart" : targetPart.toString(),
+            "workoutName" : workoutName,
+            "weight": weight,
+            "reps": reps,
+            "volume": volume
+        ]
+    }
 }
 
 class WorkoutMenuModel {
@@ -65,13 +67,13 @@ public enum TargetPart {
     
     public func toString() -> String {
             switch self {
-            case .chest: return "chest"
-            case .shoulder: return "shoulder"
-            case .back: return "back"
-            case .arm: return "arm"
-            case .abs: return "abs"
-            case .leg: return "leg"
-            case .others: return "others"
+            case .chest: return "胸"
+            case .shoulder: return "肩"
+            case .back: return "背"
+            case .arm: return "腕"
+            case .abs: return "腹"
+            case .leg: return "脚"
+            case .others: return "他"
             }
     }
 }
@@ -80,13 +82,13 @@ class TargetPartUtils {
     
     class func toTargetPart(_ targetPart: String) -> TargetPart {
         switch targetPart {
-        case "chest": return .chest
-        case "shoulder": return .shoulder
-        case "back": return .back
-        case "arm": return .arm
-        case "abs": return .abs
-        case "leg": return .leg
-        case "others": return .others
+        case "胸": return .chest
+        case "肩": return .shoulder
+        case "背": return .back
+        case "腕": return .arm
+        case "腹": return .abs
+        case "脚": return .leg
+        case "他": return .others
         default: return .others
         }
     }

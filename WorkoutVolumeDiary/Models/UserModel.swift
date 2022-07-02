@@ -35,7 +35,7 @@ public enum AuthError: Error {
     }
 }
 
-
+import UIKit
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
@@ -176,20 +176,33 @@ class UserModel {
         
     }
     
-    static func setWorkoutToFirestore(workout: [WorkoutModel]) async throws {
+    static func setWorkoutToFirestore(workout: [WorkoutModel], dateString: String) async throws {
         let db = Firestore.firestore()
+        let dicArray = workout.map{ $0.toDictionary() }
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        
-        for model in workout{
-            let document = ["workoutName": model.workoutName,
-                            "targetPart": model.targetPart.toString(),
-                            "doneAt": model.doneAt,
-                            "weight": model.weight,
-                            "reps": model.reps,
-                            "volume": model.volume] as [String : Any]
-            try await db.collection("users").document(uid).collection("workout").document().setData(document)
+        if dicArray.count == 0 {
+            return
+        } else {
+            for i in 0..<dicArray.count {
+                try await db.collection("users").document(uid).collection("workout").document(dateString).setData([String(i) : dicArray[i]], merge: true)
+            }
         }
     }
+
+//    static func upDateWorkoutToFirestore(workout: [WorkoutModel], dateString: String) async throws {
+//        let db = Firestore.firestore()
+//        guard let uid = Auth.auth().currentUser?.uid else { return }
+//
+//        for model in workout{
+//            let document = ["workoutName": model.workoutName,
+//                            "targetPart": model.targetPart.toString(),
+//                            "doneAt": model.doneAt,
+//                            "weight": model.weight,
+//                            "reps": model.reps,
+//                            "volume": model.volume] as [String : Any]
+//            try await db.collection("users").document(uid).collection("workout").document(dateString).updateData(document)
+//        }
+//    }
     
     static func getWorkoutFromFirestore(uid: String) async throws -> [WorkoutModel] {
         let db = Firestore.firestore()

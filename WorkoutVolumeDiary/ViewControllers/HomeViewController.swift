@@ -25,48 +25,52 @@ class HomeViewController: UIViewController {
     
     let logoutButton: UIButton = {
         let button = UIButton(type: .system)
-        button.backgroundColor = .red
+        button.backgroundColor = .blue
         button.setTitle("logout", for: .normal)
         return button
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         
         setupLayout()
         setupBinding()
-}
+    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        Firestore.firestore().collection("users").document(uid).getDocument(completion: { document, error in
-            if let document = document {
-                let name = document.data()!["name"] as! String
-                let email = document.data()!["email"] as! String
-                let createdAt = document.data()!["createdAt"] as! Timestamp
-                
-                self.user = User(id: uid, name: name, email: email, createdAt: createdAt)
-                print("ユーザー情報の取得に成功", self.user)
-            }
-            if error != nil {
-                print("ユーザー情報の取得に失敗", error)
-            }
-        })
+
     }
 
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+        print("aaa")
         if Auth.auth().currentUser?.uid == nil {
+            print("bbb")
             let signUpVC = SignUpViewController()
             let nav = UINavigationController(rootViewController: signUpVC)
             nav.modalPresentationStyle = .fullScreen
             self.present(nav, animated: true)
+        } else {
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+            Firestore.firestore().collection("users").document(uid).getDocument(completion: { document, error in
+                if let document = document {
+                    let name = document.data()!["name"] as! String
+                    let email = document.data()!["email"] as! String
+                    let createdAt = document.data()!["createdAt"] as! Timestamp
+
+                    self.user = User(id: uid, name: name, email: email, createdAt: createdAt)
+                    print("ユーザー情報の取得に成功", self.user as Any)
+                }
+                if error != nil {
+                    print("ユーザー情報の取得に失敗", error as Any)
+                }
+            })
+            print("ccc")
         }
-        
     }
     
     private func setupLayout() {
@@ -75,7 +79,7 @@ class HomeViewController: UIViewController {
         view.addSubview(logoutButton)
         gradientView.frame = view.bounds
         footerView.anchor(bottom: view.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 80)
-        logoutButton.anchor(top: view.bottomAnchor, right: view.rightAnchor, width: 100, height: 50)
+        logoutButton.anchor(bottom: footerView.topAnchor, right: view.rightAnchor, width: 100, height: 50)
     }
     
     private func setupBinding() {
