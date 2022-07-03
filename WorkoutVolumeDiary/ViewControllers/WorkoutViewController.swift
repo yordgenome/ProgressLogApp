@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 import FirebaseFirestore
 import RxSwift
 import RxCocoa
@@ -54,14 +55,54 @@ final class WorkoutViewController: UIViewController {
         super.viewDidLoad()
   
         currentDate = DateUtils.toDateFromString(string: headerView.dateTextField.text!)
-        
-        
+        getWorkoutData(dateString: headerView.dateTextField.text!)
+        print("workoutData:", workoutData)
         print("currentDate:", currentDate!)
         workoutTableView.delegate = self
         workoutTableView.dataSource = self
 
         setupLayout()
         setupBindings()
+    }
+    
+    private func getWorkoutData(dateString: String) {
+        let db = Firestore.firestore()
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users").document(uid).collection("workout").document(dateString).getDocument(source: .default) { snapshot, error in
+            
+            if let snapshot = snapshot {
+                guard let mapData = snapshot.data() else { return }
+                if mapData.count == 0 {
+                    return
+                } else {
+                    print("mapData:", mapData)
+                    for i in 0..<mapData.count {
+                        if let valueData = mapData["\(i)"] as? [String: Any] {
+                            print("valueData:", valueData)
+                            let workoutName: String = valueData["workoutName"] as! String
+                            let targetPart: TargetPart = TargetPartUtils.toTargetPart(valueData["targetPart"] as! String)
+                            let doneAt: Timestamp = valueData["doneAt"] as! Timestamp
+                            let weight: Double = valueData["weight"] as! Double
+                            let reps: Double = valueData["reps"] as! Double
+                            let volume: Double = valueData["volume"] as! Double
+                            
+                            let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)
+                            self.workoutData.append(data)
+                        } else {
+                            print("だめ")
+                        }
+                    }
+                    self.workoutTableView.reloadData()
+                    print("workoutData:", self.workoutData)
+                    print("ワークアウトの取得に成功")
+                }
+                
+                if let error = error {
+                    print("ワークアウトの取得に失敗:", error)
+                }
+            }
+        }
     }
     
     private func setupLayout() {
@@ -86,8 +127,8 @@ final class WorkoutViewController: UIViewController {
         headerView.dateTextField.rx.text.asDriver().drive { [weak self] text in
             guard let self = self else { return }
             self.currentDate = DateUtils.toDateFromString(string: text!)
-//            let data: [WorkoutModel] = []
-//            Task {try await UserModel.setWorkoutToFirestore(workout: data, dateString: DateUtils.toStringFromDate(date: self.currentDate!))}
+            self.getWorkoutData(dateString: text!)
+            print("workoutData:", self.workoutData)
             print("currentDate:", self.currentDate!)
         }
         .disposed(by: disposeBag)
@@ -96,6 +137,7 @@ final class WorkoutViewController: UIViewController {
             guard let self = self else { return }
             self.currentDate = Calendar.current.date(byAdding: .day, value: -1, to: self.currentDate!)!
             self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
+            self.getWorkoutData(dateString: self.headerView.dateTextField.text!)
             print("currentDate:", self.currentDate!)
         }.disposed(by: disposeBag)
 
@@ -109,6 +151,7 @@ final class WorkoutViewController: UIViewController {
                 self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
                 print("currentDate:", self.currentDate!)
             }
+            self.getWorkoutData(dateString: self.headerView.dateTextField.text!)
         }.disposed(by: disposeBag)
         
         // ワークアウト登録
@@ -157,7 +200,7 @@ final class WorkoutViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.validRegisterDriver.drive { validAll in
-            print(validAll)
+            print("validAll:", validAll)
             self.setWorkoutView.setButton.isEnabled = validAll
             self.setWorkoutView.setButton.backgroundColor = validAll ? .endColor?.withAlphaComponent(0.9) : .init(white: 0.9, alpha: 0.9)
         }

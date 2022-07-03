@@ -40,19 +40,6 @@ final class SignUpViewController: UIViewController {
         return button
     }()
     
-    private let setButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Set", for: .normal)
-        button.backgroundColor = .red
-        return button
-    }()
-    private let getButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Get", for: .normal)
-        button.backgroundColor = .red
-        return button
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -68,9 +55,6 @@ final class SignUpViewController: UIViewController {
         addSubViews()
         passwordTextField.isSecureTextEntry = true
         if #available(iOS 12.0, *) { passwordTextField.textContentType = .oneTimeCode }
-        
-        view.addSubview(setButton)
-        view.addSubview(getButton)
 
         gradientView.frame = view.bounds
         productLabel.anchor(top: view.safeAreaLayoutGuide.topAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 50, topPadding: 30)
@@ -83,12 +67,6 @@ final class SignUpViewController: UIViewController {
         passwordTextField.anchor(top: passwordLabel.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 2)
         registerButton.anchor(top: passwordTextField.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 38)
         moveToLoginButton.anchor(top: registerButton.bottomAnchor, centerX: view.centerXAnchor, width: 250, height: 30, topPadding: 50)
-                
-        setButton.anchor(bottom: view.bottomAnchor, left: view.leftAnchor, width: 150, height: 50)
-        getButton.anchor(bottom: view.bottomAnchor, right: view.rightAnchor, width: 150, height: 50)
-
-        setButton.addTarget(self, action: #selector(set), for: .touchUpInside)
-        getButton.addTarget(self, action: #selector(get), for: .touchUpInside)
     }
     
     private func addSubViews(){
@@ -170,34 +148,6 @@ final class SignUpViewController: UIViewController {
     func moveToLogin() {
         let login = LoginViewController()
         present(login, animated: true)        
-    }
-
-    
-    @objc private func set() async {
-        
-        let workout: [WorkoutModel] = [WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 10, volume: 600),
-                                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 8, volume: 600),
-                                       WorkoutModel(doneAt: Timestamp(date: Date()), targetPart: .chest, workoutName: "ベンチプレス", weight: 120, reps: 5, volume: 600)]
-        
-        do {
-            try await UserModel.setWorkoutToFirestore(workout: workout, dateString: DateUtils.toStringFromDate(date: Date()))
-            print("ワークアウトの登録に成功")
-
-        } catch {
-            print("ワークアウトの登録に失敗", error)
-        }
-    }
-    
-
-    @objc private func get() async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-
-        do {
-            workoutArray = try await UserModel.getWorkoutFromFirestore(uid: uid)
-            print("ワークアウトの取得に成功", workoutArray)
-        } catch {
-            print("ワークアウトの取得に失敗", error)
-        }
     }
     
 }

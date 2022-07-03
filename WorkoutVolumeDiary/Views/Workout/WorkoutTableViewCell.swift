@@ -14,35 +14,35 @@ class WorkoutTableViewCell: UITableViewCell {
         
 //MARK: - UIParts
     
-    let menuLabel = TreLogTableViewLabel(maskedCorner: [],
+    let menuLabel = WorkoutTableViewLabel(maskedCorner: [],
                                          backgroundColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                          textColor: .white,
                                          textAlignment: .left)
     
-    let targetPartLabel = TreLogTableViewLabel(maskedCorner: [.layerMinXMinYCorner],
+    let targetPartLabel = WorkoutTableViewLabel(maskedCorner: [.layerMinXMinYCorner],
                                                backgroundColor: .white.withAlphaComponent(0.9),
                                                textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                                textAlignment: .center)
 
-    let volumeTextLabel = TreLogTableViewLabel(maskedCorner: [],
+    let volumeTextLabel = WorkoutTableViewLabel(maskedCorner: [],
                                                backgroundColor: .white.withAlphaComponent(0.9),
                                                textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                                textAlignment: .center,
                                                text: "総負荷")
     
-    let TotalVolumeLabel = TreLogTableViewLabel(maskedCorner: [],
+    let TotalVolumeLabel = WorkoutTableViewLabel(maskedCorner: [],
                                            backgroundColor: .white.withAlphaComponent(0.9),
                                            textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                            textAlignment: .left)
-    let weightLabel = TreLogTableViewLabel(maskedCorner: [],
+    let weightLabel = WorkoutTableViewLabel(maskedCorner: [],
                                            backgroundColor: .clear,
                                            textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                            textAlignment: .center)
-    let batsuLabel = TreLogTableViewLabel(maskedCorner: [],
+    let batsuLabel = WorkoutTableViewLabel(maskedCorner: [],
                                            backgroundColor: .clear,
                                            textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                            textAlignment: .center)
-    let repsLabel = TreLogTableViewLabel(maskedCorner: [],
+    let repsLabel = WorkoutTableViewLabel(maskedCorner: [],
                                            backgroundColor: .clear,
                                            textColor: (UIColor.gold?.withAlphaComponent(0.9))!,
                                            textAlignment: .center)
@@ -110,8 +110,8 @@ class WorkoutTableViewCell: UITableViewCell {
     
 }
 
-//MARK: - TreLogTableViewLabel
-class TreLogTableViewLabel: UILabel {
+//MARK: - WorkoutTableViewLabe
+class WorkoutTableViewLabel: UILabel {
     
     init(maskedCorner: CACornerMask,
          borderWidth: CGFloat = 2,
@@ -138,97 +138,3 @@ class TreLogTableViewLabel: UILabel {
     }
 }
 
-
-//MARK: - RepsTableViewCell
-class RepsTableViewCell: UITableViewCell {
-    
-    static let identifier = "RepsTableViewCell"
-    
-    let weightLabel: UILabel = {
-       let label = UILabel()
-        label.layer.masksToBounds = true
-        label.backgroundColor = .clear
-        label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "GeezaPro", size: 10)
-        label.textAlignment = .center
-        label.backgroundColor = .systemPink
-
-        return label
-    }()
-    
-    let batsuLabel: UILabel =  {
-        let label = UILabel()
-        label.layer.masksToBounds = true
-        label.backgroundColor = .clear
-        label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "GeezaPro", size: 10)
-        label.textAlignment = .center
-        label.text = "×"
-        label.backgroundColor = .systemPink
-
-         return label
-    }()
-    
-    let repsLabel: UILabel = {
-        let label = UILabel()
-        label.layer.masksToBounds = true
-        label.backgroundColor = .clear
-        label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "GeezaPro", size: 10)
-        label.textAlignment = .center
-        label.backgroundColor = .systemPink
-
-         return label
-    }()
-    
-    let equalLabel: UILabel =  {
-        let label = UILabel()
-        label.layer.masksToBounds = true
-        label.backgroundColor = .clear
-        label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "GeezaPro", size: 10)
-        label.textAlignment = .center
-        label.text = "="
-        label.backgroundColor = .systemPink
-
-         return label
-    }()
-    
-    let volumeLabel: UILabel =  {
-        let label = UILabel()
-        label.layer.masksToBounds = true
-        label.backgroundColor = .clear
-        label.textColor = .uiLightOrange?.withAlphaComponent(0.9)
-        label.font = UIFont(name: "GeezaPro", size: 10)
-        label.textAlignment = .center
-        label.backgroundColor = .systemPink
-
-         return label
-    }()
-    
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .gray
-    }
-    
-    private func setupLayout() {
-        addSubview(weightLabel)
-        addSubview(batsuLabel)
-        addSubview(repsLabel)
-        addSubview(equalLabel)
-        addSubview(volumeLabel)
-
-        weightLabel.anchor(left: leftAnchor, centerY: centerYAnchor, width: 60,  leftPadding: 60)
-        batsuLabel.anchor(left: weightLabel.rightAnchor, centerY: centerYAnchor, width: 30,  leftPadding: 0)
-        repsLabel.anchor(left: batsuLabel.rightAnchor, centerY: centerYAnchor, width: 60,  leftPadding: 0)
-        equalLabel.anchor(left: repsLabel.rightAnchor, centerY: centerYAnchor, width: 30,  leftPadding: 0)
-        volumeLabel.anchor(left: equalLabel.rightAnchor, centerY: centerYAnchor, width: 60,  leftPadding: 0)
-
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-}

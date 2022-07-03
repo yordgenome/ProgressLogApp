@@ -178,16 +178,31 @@ class UserModel {
     
     static func setWorkoutToFirestore(workout: [WorkoutModel], dateString: String) async throws {
         let db = Firestore.firestore()
+        var setData: [String: Any] = [:]
         let dicArray = workout.map{ $0.toDictionary() }
         guard let uid = Auth.auth().currentUser?.uid else { return }
         if dicArray.count == 0 {
             return
         } else {
             for i in 0..<dicArray.count {
-                try await db.collection("users").document(uid).collection("workout").document(dateString).setData([String(i) : dicArray[i]], merge: true)
+                setData.updateValue(dicArray[i], forKey: String(i))
             }
         }
+        try await db.collection("users").document(uid).collection("workout").document(dateString).setData(setData, merge: true)
     }
+    
+//    static func setWorkoutToFirestore(workout: [WorkoutModel], dateString: String) async throws {
+//        let db = Firestore.firestore()
+//        let dicArray = workout.map{ $0.toDictionary() }
+//        guard let uid = Auth.auth().currentUser?.uid else { return }
+//        if dicArray.count == 0 {
+//            return
+//        } else {
+//            for i in 0..<dicArray.count {
+//                try await db.collection("users").document(uid).collection("workout").document(dateString).setData([String(i) : dicArray[i]], merge: true)
+//            }
+//        }
+//    }
 
 //    static func upDateWorkoutToFirestore(workout: [WorkoutModel], dateString: String) async throws {
 //        let db = Firestore.firestore()
@@ -204,24 +219,51 @@ class UserModel {
 //        }
 //    }
     
-    static func getWorkoutFromFirestore(uid: String) async throws -> [WorkoutModel] {
+//    static func getWorkoutFromFirestore(uid: String) async throws -> [WorkoutModel] {
+//        let db = Firestore.firestore()
+//        var workoutArray: [WorkoutModel] = []
+//        guard let uid = Auth.auth().currentUser?.uid else { return workoutArray }
+//
+//        let snapshots = try await db.collection("users").document(uid).collection("workout").getDocuments(source: .default)
+//        let mapData = snapshots.documents
+//
+//        for document in mapData {
+//            let workoutName: String = document.data()["workoutName"] as! String
+//            let targetPart: TargetPart = TargetPartUtils.toTargetPart(document.data()["targetPart"] as! String)
+//            let doneAt: Timestamp = document.data()["doneAt"] as! Timestamp
+//            let weight: Double = document.data()["weight"] as! Double
+//            let reps: Double = document.data()["reps"] as! Double
+//            let volume: Double = document.data()["volume"] as! Double
+//
+//            let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)
+//            workoutArray.append(data)
+//        }
+//        return workoutArray
+//    }
+    
+    static func getWorkoutFromFirestore(uid: String, dateString: String) async throws -> [WorkoutModel] {
         let db = Firestore.firestore()
         var workoutArray: [WorkoutModel] = []
         guard let uid = Auth.auth().currentUser?.uid else { return workoutArray }
         
-        let snapshots = try await db.collection("users").document(uid).collection("workout").getDocuments(source: .default)
-        let mapData = snapshots.documents
-        
-        for document in mapData {
-            let workoutName: String = document.data()["workoutName"] as! String
-            let targetPart: TargetPart = TargetPartUtils.toTargetPart(document.data()["targetPart"] as! String)
-            let doneAt: Timestamp = document.data()["doneAt"] as! Timestamp
-            let weight: Double = document.data()["weight"] as! Double
-            let reps: Double = document.data()["reps"] as! Double
-            let volume: Double = document.data()["volume"] as! Double
-            
-            let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)
-            workoutArray.append(data)
+        let snapshot = try await  db.collection("users").document(uid).collection("workout").document(dateString).getDocument(source: .default)
+        guard let mapData = snapshot.data() else { return workoutArray }
+        if mapData.count == 0 {
+            return workoutArray
+        } else {
+            for i in 0..<mapData.count {
+                if let valueData = mapData.values as? [[String: Any]] {
+                    let workoutName: String = valueData[i]["workoutName"] as! String
+                    let targetPart: TargetPart = TargetPartUtils.toTargetPart(valueData[i]["targetPart"] as! String)
+                    let doneAt: Timestamp = valueData[i]["doneAt"] as! Timestamp
+                    let weight: Double = valueData[i]["weight"] as! Double
+                    let reps: Double = valueData[i]["reps"] as! Double
+                    let volume: Double = valueData[i]["volume"] as! Double
+                    
+                    let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)
+                    workoutArray.append(data)
+                }
+            }
         }
         return workoutArray
     }

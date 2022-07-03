@@ -47,9 +47,8 @@ class HomeViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("aaa")
+        
         if Auth.auth().currentUser?.uid == nil {
-            print("bbb")
             let signUpVC = SignUpViewController()
             let nav = UINavigationController(rootViewController: signUpVC)
             nav.modalPresentationStyle = .fullScreen
@@ -69,7 +68,6 @@ class HomeViewController: UIViewController {
                     print("ユーザー情報の取得に失敗", error as Any)
                 }
             })
-            print("ccc")
         }
     }
     
