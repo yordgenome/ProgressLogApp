@@ -1,13 +1,14 @@
 //
-//  SetWorkoutView.swift
+//  CreateWorkoutView.swift
 //  WorkoutVolumeDiary
 //
-//  Created by Yo Tahara on 2022/06/25.
+//  Created by Yo Tahara on 2022/07/06.
 //
 
+import Foundation
 import UIKit
 
-class SetWorkoutView: UIView, UITextFieldDelegate{
+class CreateWorkoutView: UIView, UITextFieldDelegate{
     
     
     let workoutNameLabel: UILabel = {
@@ -117,7 +118,7 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
         
         targetPartLabel.anchor(top: topAnchor, left: leftAnchor, width: 80, height: 12, topPadding: 10, leftPadding: 20)
         targetPartTextField.anchor(top: targetPartLabel.bottomAnchor, left: targetPartLabel.leftAnchor, width: 100, height: 20, topPadding: 2)
-        workoutNameLabel.anchor(top: targetPartLabel.topAnchor, left: targetPartTextField.rightAnchor, width: 100, height: 12, leftPadding: 20)
+        workoutNameLabel.anchor(top: targetPartLabel.topAnchor, left: targetPartTextField.rightAnchor, width: 80, height: 12, leftPadding: 20)
         workoutNameTextField.anchor(top: targetPartTextField.topAnchor, left: workoutNameLabel.leftAnchor, right: rightAnchor, height: 20, rightPadding: 20)
         weightlabel.anchor(top: targetPartTextField.bottomAnchor, left: targetPartLabel.leftAnchor, width: 80, height: 12, topPadding: 10)
         weightTextField.anchor(top: weightlabel.bottomAnchor, left: weightlabel.leftAnchor, width: 80, height: 20, topPadding: 2)

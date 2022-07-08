@@ -257,7 +257,7 @@ class UserModel {
                     let targetPart: TargetPart = TargetPartUtils.toTargetPart(valueData[i]["targetPart"] as! String)
                     let doneAt: Timestamp = valueData[i]["doneAt"] as! Timestamp
                     let weight: Double = valueData[i]["weight"] as! Double
-                    let reps: Double = valueData[i]["reps"] as! Double
+                    let reps: Int = valueData[i]["reps"] as! Int
                     let volume: Double = valueData[i]["volume"] as! Double
                     
                     let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)

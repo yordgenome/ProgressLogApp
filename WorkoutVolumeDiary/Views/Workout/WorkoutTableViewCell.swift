@@ -110,7 +110,7 @@ class WorkoutTableViewCell: UITableViewCell {
     
 }
 
-//MARK: - WorkoutTableViewLabe
+//MARK: - WorkoutTableViewLabel
 class WorkoutTableViewLabel: UILabel {
     
     init(maskedCorner: CACornerMask,

@@ -42,11 +42,11 @@ final class WorkoutViewController: UIViewController {
     var currentDate: Date?
       
     private let workoutTableView: UITableView = {
-        let tv = UITableView.init(frame: .zero, style: .grouped)
-        tv.register(WorkoutTableViewCell.self, forCellReuseIdentifier: WorkoutTableViewCell.identifier)
-        tv.backgroundColor = .clear
-        tv.layer.cornerRadius = 10
-        return tv
+        let tableView = UITableView.init(frame: .zero, style: .grouped)
+        tableView.register(WorkoutTableViewCell.self, forCellReuseIdentifier: WorkoutTableViewCell.identifier)
+        tableView.backgroundColor = .clear
+        tableView.layer.cornerRadius = 10
+        return tableView
     }()
     
 //MARK: - LifeCycles
@@ -55,9 +55,6 @@ final class WorkoutViewController: UIViewController {
         super.viewDidLoad()
   
         currentDate = DateUtils.toDateFromString(string: headerView.dateTextField.text!)
-        getWorkoutData(dateString: headerView.dateTextField.text!)
-        print("workoutData:", workoutData)
-        print("currentDate:", currentDate!)
         workoutTableView.delegate = self
         workoutTableView.dataSource = self
 
@@ -66,25 +63,27 @@ final class WorkoutViewController: UIViewController {
     }
     
     private func getWorkoutData(dateString: String) {
+        workoutData.removeAll()
         let db = Firestore.firestore()
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         db.collection("users").document(uid).collection("workout").document(dateString).getDocument(source: .default) { snapshot, error in
-            
+            print(#function)
             if let snapshot = snapshot {
-                guard let mapData = snapshot.data() else { return }
+                guard let mapData = snapshot.data() else {
+                    self.workoutTableView.reloadData()
+                    return }
                 if mapData.count == 0 {
                     return
                 } else {
                     print("mapData:", mapData)
                     for i in 0..<mapData.count {
                         if let valueData = mapData["\(i)"] as? [String: Any] {
-                            print("valueData:", valueData)
                             let workoutName: String = valueData["workoutName"] as! String
                             let targetPart: TargetPart = TargetPartUtils.toTargetPart(valueData["targetPart"] as! String)
                             let doneAt: Timestamp = valueData["doneAt"] as! Timestamp
                             let weight: Double = valueData["weight"] as! Double
-                            let reps: Double = valueData["reps"] as! Double
+                            let reps: Int = valueData["reps"] as! Int
                             let volume: Double = valueData["volume"] as! Double
                             
                             let data = WorkoutModel(doneAt: doneAt, targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: volume)
@@ -93,14 +92,15 @@ final class WorkoutViewController: UIViewController {
                             print("だめ")
                         }
                     }
-                    self.workoutTableView.reloadData()
                     print("workoutData:", self.workoutData)
                     print("ワークアウトの取得に成功")
                 }
-                
-                if let error = error {
-                    print("ワークアウトの取得に失敗:", error)
-                }
+                self.workoutTableView.reloadData()
+            }
+            
+            if let error = error {
+                self.workoutTableView.reloadData()
+                print("ワークアウトの取得に失敗:", error)
             }
         }
     }
@@ -113,9 +113,9 @@ final class WorkoutViewController: UIViewController {
         view.addSubview(footerView)
         
         gradientView.frame = view.bounds
-        headerView.anchor(top: view.topAnchor, centerX: view.centerXAnchor, width: view.frame.width+4, height: 80)
+        headerView.anchor(top: view.topAnchor, centerX: view.centerXAnchor, width: view.frame.width, height: 80)
         setWorkoutView.anchor(top: headerView.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 100)
-        workoutTableView.anchor(top: setWorkoutView.bottomAnchor, left: view.leftAnchor, right: view.rightAnchor, width: view.bounds.width-20, height: view.bounds.height-50, topPadding: 20, leftPadding: 10, rightPadding:  10)
+        workoutTableView.anchor(top: setWorkoutView.bottomAnchor, bottom: footerView.topAnchor, left: view.leftAnchor, right: view.rightAnchor, width: view.bounds.width-20, topPadding: 5, bottomPadding: 5, leftPadding: 10, rightPadding: 10)
         footerView.anchor(bottom: view.bottomAnchor, centerX: view.centerXAnchor, width: view.bounds.width, height: 80)
     }
 
@@ -129,7 +129,6 @@ final class WorkoutViewController: UIViewController {
             self.currentDate = DateUtils.toDateFromString(string: text!)
             self.getWorkoutData(dateString: text!)
             print("workoutData:", self.workoutData)
-            print("currentDate:", self.currentDate!)
         }
         .disposed(by: disposeBag)
         
@@ -138,18 +137,15 @@ final class WorkoutViewController: UIViewController {
             self.currentDate = Calendar.current.date(byAdding: .day, value: -1, to: self.currentDate!)!
             self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
             self.getWorkoutData(dateString: self.headerView.dateTextField.text!)
-            print("currentDate:", self.currentDate!)
         }.disposed(by: disposeBag)
 
         headerView.nextDayButton.rx.tap.asDriver().drive { [weak self] _ in
             guard let self = self else { return }
             if self.currentDate == DateUtils.toDateFromString(string: DateUtils.toStringFromDate(date: Date())) {
-                print("currentDate:", self.currentDate!)
                 return
             } else {
                 self.currentDate = Calendar.current.date(byAdding: .day, value: 1, to: self.currentDate!)!
                 self.headerView.dateTextField.text = DateUtils.toStringFromDate(date: self.currentDate!)
-                print("currentDate:", self.currentDate!)
             }
             self.getWorkoutData(dateString: self.headerView.dateTextField.text!)
         }.disposed(by: disposeBag)
@@ -160,8 +156,8 @@ final class WorkoutViewController: UIViewController {
             let targetPart = TargetPartUtils.toTargetPart(self.setWorkoutView.targetPartTextField.text!)
             let workoutName = self.setWorkoutView.workoutNameTextField.text!
             let weight = Double(self.setWorkoutView.weightTextField.text!)!
-            let reps = Double(self.setWorkoutView.repsTextField.text!)!
-            let workout = WorkoutModel(doneAt: Timestamp(date: self.currentDate!), targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: weight*reps)
+            let reps = Int(self.setWorkoutView.repsTextField.text!)!
+            let workout = WorkoutModel(doneAt: Timestamp(date: self.currentDate!), targetPart: targetPart, workoutName: workoutName, weight: weight, reps: reps, volume: weight*Double(reps))
             self.workoutData.append(workout)
             self.workoutTableView.reloadData()
             print(self.workoutData)
@@ -206,12 +202,20 @@ final class WorkoutViewController: UIViewController {
         }
         .disposed(by: disposeBag)
         
+        // footerView
+        
         footerView.homeView.button?.rx.tap.asDriver().drive { [ weak self ] _ in
             let homeVC = HomeViewController()
             homeVC.modalPresentationStyle = .fullScreen
             self?.present(homeVC, animated: true)
         }
         .disposed(by: disposeBag)
+        
+        footerView.boostView.button?.rx.tap.asDriver().drive(onNext: { [weak self] in
+            let regiWorkoutVC = RegisterWorkoutMenuController()
+            regiWorkoutVC.modalPresentationStyle = .fullScreen
+            self?.present(regiWorkoutVC, animated: true)
+        }).disposed(by: disposeBag)
                                                  
     }
     

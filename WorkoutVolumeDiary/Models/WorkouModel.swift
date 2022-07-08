@@ -15,7 +15,7 @@ struct WorkoutModel {
     var targetPart: TargetPart
     var workoutName: String = ""
     var weight: Double = 1
-    var reps: Double = 1
+    var reps: Int = 1
     var volume: Double
 
 
@@ -23,7 +23,7 @@ struct WorkoutModel {
          targetPart: TargetPart,
          workoutName: String,
          weight: Double,
-         reps: Double,
+         reps: Int,
          volume: Double){
 
         self.doneAt = doneAt
@@ -31,7 +31,7 @@ struct WorkoutModel {
         self.workoutName = workoutName
         self.weight = weight
         self.reps = reps
-        self.volume = weight * reps
+        self.volume = weight * Double(reps)
     }
     
     func toDictionary() -> [String: Any] {
@@ -46,15 +46,7 @@ struct WorkoutModel {
     }
 }
 
-class WorkoutMenuModel {
-    var menu: [String: TargetPart] =
-    ["ベンチプレス": .chest,
-     "アームカール": .arm,
-     "サイドレイズ": .shoulder,
-     "クランチ": .abs,
-     "スクワット": .leg
-    ]
-}
+
 
 public enum TargetPart {
     case chest

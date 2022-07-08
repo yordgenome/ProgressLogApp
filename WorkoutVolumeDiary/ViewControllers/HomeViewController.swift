@@ -81,7 +81,19 @@ class HomeViewController: UIViewController {
     }
     
     private func setupBinding() {
-        footerView.workoutView.button?.addTarget(self, action: #selector(workoutAction), for: .touchUpInside)
+        
+        footerView.boostView.button?.rx.tap.asDriver().drive(onNext: { [weak self] in
+            let regiWorkoutVC = RegisterWorkoutMenuController()
+            regiWorkoutVC.modalPresentationStyle = .fullScreen
+            self?.present(regiWorkoutVC, animated: true)
+        }).disposed(by: disposeBag)
+        
+        footerView.workoutView.button?.rx.tap.asDriver().drive { [ weak self ] _ in
+            let workoutVC = WorkoutViewController()
+            workoutVC.modalPresentationStyle = .fullScreen
+            self?.present(workoutVC, animated: true)
+        }
+        .disposed(by: disposeBag)
 
         
         logoutButton.addTarget(self, action: #selector(logout), for: .touchUpInside)
@@ -97,18 +109,7 @@ class HomeViewController: UIViewController {
         } catch {
             print("ログアウトに失敗", error)
         }
-        
     }
-    
-    
-    @objc private func workoutAction() {
-        let workoutVC = WorkoutViewController()
-        workoutVC.modalPresentationStyle = .fullScreen
-        self.present(workoutVC, animated: true)
-        print(#function)
-        
-    }
-    
 }
 
 
