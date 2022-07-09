@@ -12,7 +12,7 @@ import SwiftUI
 
 struct WorkoutModel {
     var doneAt: Timestamp = Timestamp(date: Date())
-    var targetPart: TargetPart
+    var targetPart: String = ""
     var workoutName: String = ""
     var weight: Double = 1
     var reps: Int = 1
@@ -20,7 +20,7 @@ struct WorkoutModel {
 
 
     init(doneAt: Timestamp,
-         targetPart: TargetPart,
+         targetPart: String,
          workoutName: String,
          weight: Double,
          reps: Int,
@@ -37,7 +37,7 @@ struct WorkoutModel {
     func toDictionary() -> [String: Any] {
         return [
             "doneAt": doneAt,
-            "targetPart" : targetPart.toString(),
+            "targetPart" : targetPart,
             "workoutName" : workoutName,
             "weight": weight,
             "reps": reps,
@@ -48,42 +48,42 @@ struct WorkoutModel {
 
 
 
-public enum TargetPart {
-    case chest
-    case back
-    case arm
-    case shoulder
-    case abs
-    case leg
-    case others
-    
-    public func toString() -> String {
-            switch self {
-            case .chest: return "胸"
-            case .shoulder: return "肩"
-            case .back: return "背"
-            case .arm: return "腕"
-            case .abs: return "腹"
-            case .leg: return "脚"
-            case .others: return "他"
-            }
-    }
-}
-
-class TargetPartUtils {
-    
-    class func toTargetPart(_ targetPart: String) -> TargetPart {
-        switch targetPart {
-        case "胸": return .chest
-        case "肩": return .shoulder
-        case "背": return .back
-        case "腕": return .arm
-        case "腹": return .abs
-        case "脚": return .leg
-        case "他": return .others
-        default: return .others
-        }
-    }
-}
+//public enum TargetPart {
+//    case chest
+//    case back
+//    case arm
+//    case shoulder
+//    case abs
+//    case leg
+//    case others
+//
+//    public func toString() -> String {
+//            switch self {
+//            case .chest: return "胸"
+//            case .shoulder: return "肩"
+//            case .back: return "背"
+//            case .arm: return "腕"
+//            case .abs: return "腹"
+//            case .leg: return "脚"
+//            case .others: return "他"
+//            }
+//    }
+//}
+//
+//class TargetPartUtils {
+//
+//    class func toTargetPart(_ targetPart: String) -> TargetPart {
+//        switch targetPart {
+//        case "胸": return .chest
+//        case "肩": return .shoulder
+//        case "背": return .back
+//        case "腕": return .arm
+//        case "腹": return .abs
+//        case "脚": return .leg
+//        case "他": return .others
+//        default: return .others
+//        }
+//    }
+//}
 
 

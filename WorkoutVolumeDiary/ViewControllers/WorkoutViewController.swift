@@ -23,21 +23,12 @@ final class WorkoutViewController: UIViewController {
     private let headerView = DatePickView()
     private let setWorkoutView = SetWorkoutView()
     
-    let userDefaults = UserDefaults.standard
-    
     let disposeBag = DisposeBag()
     
-    var workoutMenu = ["腕立て伏せ",
-                       "ベンチプレス",
-                       "懸垂",
-                       "スクワット",
-                       "アームカール",
-                       "ショルダープレス"
-    ]
+    private var workoutData: [WorkoutModel] = []
+    private var workoutMenuArray: [WorkoutMenu] = []
     
-    private let targetParts = ["胸", "背", "肩", "腕", "腹", "脚", "他"]
-    
-    var workoutData: [WorkoutModel] = []
+    var selectedTarget = 0
     
     var currentDate: Date?
       
@@ -53,6 +44,11 @@ final class WorkoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        workoutMenuArray = UserDefaults.standard.getWorkoutMenu("WorkoutMenu") ?? []
+        if workoutMenuArray.isEmpty {
+            setupWorkoutMenu()
+        }
   
         currentDate = DateUtils.toDateFromString(string: headerView.dateTextField.text!)
         workoutTableView.delegate = self
@@ -80,7 +76,7 @@ final class WorkoutViewController: UIViewController {
                     for i in 0..<mapData.count {
                         if let valueData = mapData["\(i)"] as? [String: Any] {
                             let workoutName: String = valueData["workoutName"] as! String
-                            let targetPart: TargetPart = TargetPartUtils.toTargetPart(valueData["targetPart"] as! String)
+                            let targetPart: String = valueData["targetPart"] as! String
                             let doneAt: Timestamp = valueData["doneAt"] as! Timestamp
                             let weight: Double = valueData["weight"] as! Double
                             let reps: Int = valueData["reps"] as! Int
@@ -103,6 +99,16 @@ final class WorkoutViewController: UIViewController {
                 print("ワークアウトの取得に失敗:", error)
             }
         }
+    }
+    
+    private func setupWorkoutMenu() {
+        workoutMenuArray.append(WorkoutMenu(target: "胸", menu: ["ベンチプレス", "ダンベルフライ", "ディップス"]))
+        workoutMenuArray.append(WorkoutMenu(target: "肩", menu: ["ショルダープレス", "サイドレイズ", "リアレイズ"]))
+        workoutMenuArray.append(WorkoutMenu(target: "腕", menu: ["アームカール", "ハンマーカール", "スカルクラッシャー"]))
+        workoutMenuArray.append(WorkoutMenu(target: "背", menu: ["ラットプルダウン", "ベントオーバーロウ", "バックエクステンション"]))
+        workoutMenuArray.append(WorkoutMenu(target: "脚", menu: ["スクワット", "レッグエクステンション", "レッグカール"]))
+        workoutMenuArray.append(WorkoutMenu(target: "腹", menu: ["シットアップ", "ツイストシットアップ", "レッグレイズ"]))
+        workoutMenuArray.append(WorkoutMenu(target: "他", menu: []))
     }
     
     private func setupLayout() {
@@ -153,7 +159,7 @@ final class WorkoutViewController: UIViewController {
         // ワークアウト登録
         setWorkoutView.setButton.rx.tap.asDriver().drive {[ weak self ] _ in
             guard let self = self else { return }
-            let targetPart = TargetPartUtils.toTargetPart(self.setWorkoutView.targetPartTextField.text!)
+            let targetPart = self.setWorkoutView.targetPartTextField.text!
             let workoutName = self.setWorkoutView.workoutNameTextField.text!
             let weight = Double(self.setWorkoutView.weightTextField.text!)!
             let reps = Int(self.setWorkoutView.repsTextField.text!)!
@@ -166,6 +172,13 @@ final class WorkoutViewController: UIViewController {
             }
         }.disposed(by: disposeBag)
 
+        setWorkoutView.clearButton.rx.tap.asDriver().drive {[ weak self ] _ in
+            guard let self = self else { return }
+            self.setWorkoutView.targetPartTextField.text = ""
+            self.setWorkoutView.workoutNameTextField.text = ""
+            self.setWorkoutView.repsTextField.text = ""
+            self.setWorkoutView.weightTextField.text = ""
+        }.disposed(by: disposeBag)
         
         setWorkoutView.workoutNameTextField.rx.text
             .asDriver()
@@ -314,7 +327,7 @@ extension WorkoutViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: WorkoutTableViewCell.identifier, for: indexPath) as! WorkoutTableViewCell
         cell.menuLabel.text = workoutData[indexPath.section].workoutName
-        cell.targetPartLabel.text = workoutData[indexPath.section].targetPart.toString()
+        cell.targetPartLabel.text = workoutData[indexPath.section].targetPart
         cell.weightLabel.text = workoutData[indexPath.section].weight.description
         cell.repsLabel.text = workoutData[indexPath.section].reps.description
         cell.selectionStyle = .none
@@ -349,9 +362,7 @@ extension WorkoutViewController: UITableViewDelegate, UITableViewDataSource {
             
             let alert = UIAlertController(title: "確認", message: "選択中のデータを削除しますか?", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "削除", style: .destructive, handler: { _ in
-                // 配列から削除
                 self.workoutData.remove(at: indexPath.section)
-                // セルから削除
                 let indexSet = NSMutableIndexSet()
                 indexSet.add(indexPath.section)
                 tableView.deleteSections(indexSet as IndexSet, with: .fade)
@@ -381,25 +392,26 @@ extension WorkoutViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         if pickerView.tag == 1 {
-            return targetParts.count
+            return workoutMenuArray.count
         } else {
-            return workoutMenu.count
+            return workoutMenuArray[selectedTarget].menu.count
         }
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         if pickerView.tag == 1 {
-            return targetParts[row]
+            selectedTarget = row
+            return workoutMenuArray[row].target
         } else {
-            return workoutMenu[row]
+            return workoutMenuArray[selectedTarget].menu[row]
         }
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if pickerView.tag == 1 {
-            setWorkoutView.targetPartTextField.text = targetParts[row]
+            setWorkoutView.targetPartTextField.text = workoutMenuArray[row].target
         } else {
-            setWorkoutView.workoutNameTextField.text = workoutMenu[row]
+            setWorkoutView.workoutNameTextField.text = workoutMenuArray[selectedTarget].menu[row]
         }
     }
 }

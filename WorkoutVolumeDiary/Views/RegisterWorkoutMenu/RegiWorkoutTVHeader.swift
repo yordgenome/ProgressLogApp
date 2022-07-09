@@ -34,6 +34,15 @@ class RegiWorkoutTVHeader: UIView {
         return button
     }()
     
+    let addMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.layer.backgroundColor = UIColor.gold?.cgColor
+        button.layer.cornerRadius = 15
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.tintColor = .white
+        return button
+    }()
+    
     init(frame: CGRect, section: Int) {
         super.init(frame: frame)
         self.section = section
@@ -46,10 +55,13 @@ class RegiWorkoutTVHeader: UIView {
         layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         backgroundColor = .white
         
-        addSubview(openSectionButton)
+
         addSubview(targetLabel)
+        addSubview(openSectionButton)
+        addSubview(addMenuButton)
         targetLabel.anchor(top: topAnchor, bottom: bottomAnchor, left: leftAnchor, width: 150)
         openSectionButton.anchor(top: topAnchor, bottom: bottomAnchor, right: rightAnchor, width: 60)
+        addMenuButton.anchor(top: topAnchor, bottom: bottomAnchor, right: openSectionButton.leftAnchor, width: 30)
         
         openSectionButton.addTarget(self, action: #selector(tappedButton), for: .touchUpInside)
     }

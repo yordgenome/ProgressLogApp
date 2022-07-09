@@ -52,7 +52,7 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
     let targetPartTextField: UITextField = {
         let textField = UITextField()
         textField.tag = 0
-        textField.placeholder = "ターゲット部位"
+        textField.placeholder = "部位"
         textField.borderStyle = .roundedRect
         textField.textColor = .endColor
         return textField
@@ -98,6 +98,15 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
         return button
     }()
     
+    let clearButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("クリア", for: .normal)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.layer.cornerRadius = 5
+        button.layer.backgroundColor = UIColor.gold?.cgColor
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .white.withAlphaComponent(0.9)
@@ -124,8 +133,8 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
         batsuLabel.anchor(top: weightTextField.topAnchor, left: weightTextField.rightAnchor, width: 20, height: 20, leftPadding: 20)
         repslabel.anchor(top: weightlabel.topAnchor, left: batsuLabel.rightAnchor, width: 80, height: 15, leftPadding: 20)
         repsTextField.anchor(top: weightTextField.topAnchor, left: repslabel.leftAnchor, width: 80, height: 20)
-        setButton.anchor(top: weightTextField.topAnchor, right: rightAnchor, width: 40, height: 20, rightPadding: 20)
-        
+        setButton.anchor(bottom: weightTextField.bottomAnchor, right: rightAnchor, width: 45, height: 34, rightPadding: 20)
+        clearButton.anchor(bottom: weightTextField.bottomAnchor, right: setButton.leftAnchor, width: 45, height: 34, rightPadding: 20)
     }
     
     private func addsubViews() {
@@ -139,5 +148,6 @@ class SetWorkoutView: UIView, UITextFieldDelegate{
         addSubview(weightTextField)
         addSubview(repsTextField)
         addSubview(setButton)
+        addSubview(clearButton)
     }
 }

@@ -10,9 +10,10 @@ import FirebaseAuth
 import FirebaseFirestore
 import RxSwift
 import RxCocoa
-import SwiftUI
 
-class WorkoutMenu {
+
+
+class WorkoutMenu: Codable {
     var target: String
     var menu: [String]
     var isOpened: Bool = true
@@ -24,10 +25,12 @@ class WorkoutMenu {
     }
 }
 
+
 protocol TableHeaderViewDelegate {
     /// 収束状態の変更要求
     func changeCellState(view: RegiWorkoutTVHeader, section: Int)
 }
+
 
 final class RegisterWorkoutMenuController: UIViewController {
     
@@ -43,18 +46,20 @@ final class RegisterWorkoutMenuController: UIViewController {
     let workoutMenuTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(RegiWorkoutCell.self, forCellReuseIdentifier: RegiWorkoutCell.identifier)
-//        tableView.register(RegiWorkoutTVHeader.self, forHeaderFooterViewReuseIdentifier: RegiWorkoutTVHeader.identifier)
         return tableView
     }()
         
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        workoutMenuArray = UserDefaults.standard.getWorkoutMenu("WorkoutMenu") ?? []
+        
+        if workoutMenuArray.isEmpty {
+            setupWorkoutMenu()
+        }
         workoutMenuTableView.delegate = self
         workoutMenuTableView.dataSource = self
         workoutMenuTableView.backgroundColor = .clear
-        
-        setupWorkoutMenu()
         
         setupLayout()
         setupBindings()
@@ -115,6 +120,9 @@ final class RegisterWorkoutMenuController: UIViewController {
         }
         .disposed(by: disposeBag)
     }
+    
+    
+    
 }
 
 //MARK: - UITableViewDelegate, UITableViewDataSource
@@ -146,7 +154,7 @@ extension RegisterWorkoutMenuController: UITableViewDelegate, UITableViewDataSou
         cell.selectionStyle = .none
         return cell
     }
-
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = RegiWorkoutTVHeader(frame: .zero, section: section)
         headerView.targetLabel.text = workoutMenuArray[section].target
@@ -155,13 +163,36 @@ extension RegisterWorkoutMenuController: UITableViewDelegate, UITableViewDataSou
             ? UIImage(systemName: "chevron.up")
             : UIImage(systemName: "chevron.down"), for: .normal)
         headerView.delegate = self
+//        headerView.center = UIPanGestureRecognizer().location(in: headerView.superview!)
 
+        
+        headerView.addMenuButton.rx.tap.asDriver().drive(onNext:  { [weak self] in
+            guard let self = self else { return }
+            let alert: UIAlertController = UIAlertController(title: "\(self.workoutMenuArray[section].target )", message: "トレーニング種目を登録", preferredStyle: UIAlertController.Style.alert)
+            alert.addTextField(configurationHandler: nil)
+            alert.textFields?.first?.placeholder = "トレーニング種目名"
+            alert.textFields?.first?.keyboardType = .namePhonePad
+            let saveMenuAction: UIAlertAction = UIAlertAction(title: "登録", style: UIAlertAction.Style.default, handler: { (_: UIAlertAction!) -> Void in
+                guard let text = alert.textFields?.first?.text, !text.isEmpty else {
+                    return
+                }
+                self.workoutMenuArray[section].menu.append(text)
+                UserDefaults.standard.setWorkoutMenu(self.workoutMenuArray, "WorkoutMenu")
+                self.workoutMenuTableView.reloadSections(IndexSet([section]), with: .automatic)
+                
+            })
+            let cancelAction: UIAlertAction = UIAlertAction(title: "キャンセル", style: UIAlertAction.Style.cancel, handler: nil)
+            alert.addAction(saveMenuAction)
+            alert.addAction(cancelAction)
+            self.present(alert, animated: true, completion: nil)
+        }).disposed(by: disposeBag)
+        
         return headerView
     }
-
+    
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 25
+        return 30
     }
         
     // cellのスワイプ・編集処理
@@ -177,9 +208,7 @@ extension RegisterWorkoutMenuController: UITableViewDelegate, UITableViewDataSou
             
             let alert = UIAlertController(title: "確認", message: "選択中のデータを削除しますか?", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "削除", style: .destructive, handler: { _ in
-                // 配列から削除
                 self.workoutMenuArray[indexPath.section].menu.remove(at: indexPath.row)
-                // セルから削除
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }))
             alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
@@ -200,6 +229,7 @@ extension RegisterWorkoutMenuController: UITableViewDelegate, UITableViewDataSou
         let workoutMenu = workoutMenuArray[sourceIndexPath.section].menu[sourceIndexPath.row]
         workoutMenuArray[sourceIndexPath.section].menu.remove(at: sourceIndexPath.row)
         workoutMenuArray[sourceIndexPath.section].menu.insert(workoutMenu, at: destinationIndexPath.row)
+        UserDefaults.standard.setWorkoutMenu(workoutMenuArray, "WorkoutMenu")
     }
 
     func tableView(_ tableView: UITableView, targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath, toProposedIndexPath proposedDestinationIndexPath: IndexPath) -> IndexPath {
@@ -210,13 +240,35 @@ extension RegisterWorkoutMenuController: UITableViewDelegate, UITableViewDataSou
             return proposedDestinationIndexPath
         }
     }
+    
+//    func indexPathForGestureRecognizer(_ recognizer: UIGestureRecognizer) -> IndexPath {
+//        let coordinateView: UIView = workoutMenuTableView.superview! // This can actually be pretty much anything as long as it is in hierarchy
+//        let y = recognizer.location(in: coordinateView).y
+//        if let hitCell = workoutMenuTableView.visibleCells.first(where: { cell in
+//            let frameInCoordinateView = cell.convert(cell.bounds, to: coordinateView)
+//            return frameInCoordinateView.minY >= y && frameInCoordinateView.maxY <= y
+//        }) {
+//            // We have the cell at which the finger is. Retrieve the index path
+//            return workoutMenuTableView.indexPath(for: hitCell) ?? IndexPath(row: 0, section: 0) // This should always succeed but just in case
+//        } else {
+//            // We may be out of bounds. That may be either too high which means above the table view otherwise too low
+//            if recognizer.location(in: workoutMenuTableView).y < 0.0 {
+//                return IndexPath(row: 0, section: 0)
+//            } else {
+//                guard workoutMenuTableView.numberOfSections > 0 else {
+//                    return IndexPath(row: 0, section: 0) // Nothing in the table view at all
+//                }
+//                let section = workoutMenuTableView.numberOfSections-1
+//                return IndexPath(row: workoutMenuTableView.numberOfRows(inSection: section), section: section)
+//            }
+//        }
+//    }
 }
 
 //MARK: - TableHeaderViewDelegate
 extension RegisterWorkoutMenuController: TableHeaderViewDelegate {
 
     func changeCellState(view: RegiWorkoutTVHeader, section: Int) {
-        print(#function)
         workoutMenuArray[section].isOpened = !workoutMenuArray[section].isOpened
         workoutMenuTableView.reloadSections(IndexSet([section]), with: .automatic)
     }
