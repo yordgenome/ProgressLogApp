@@ -14,9 +14,7 @@ import RxCocoa
 
 final class WorkoutViewController: UIViewController {
     
-//MARK: - Properties
-//    private var workoutMenu = WorkoutMenuModel()
-    
+//MARK: - Properties    
     private let viewModel = SetworkoutViewModel()
     private let gradientView = GradientView()
     private let footerView = MuscleFooterView()
@@ -190,6 +188,7 @@ final class WorkoutViewController: UIViewController {
         setWorkoutView.targetPartTextField.rx.text
             .asDriver()
             .drive { [weak self] text in
+                self?.setWorkoutView.workoutNameTextField.text = ""
                 self?.viewModel.targetPartTextInput.onNext(text ?? "")
             }
             .disposed(by: disposeBag)

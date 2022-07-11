@@ -18,15 +18,6 @@ extension UIColor{
 
     static let gold = UIColor(hex: "#A57C01")
 
-    
-    
-    static let appGrullo = UIColor(hex: "AA977C")
-    static let appDarkSilver = UIColor(hex: "7C7669")
-    static let appDavysGray = UIColor(hex: "5C5C5A")
-    static let appCMikadoYellow = UIColor(hex: "DDDAB2")
-    static let appAlabaster = UIColor(hex: "F3EDE9")
-    static let appPaleSilver = UIColor(hex: "CAC4B5")    
-
 convenience init?(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
@@ -55,6 +46,4 @@ convenience init?(hex: String) {
         
         self.init(red: r, green: g, blue: b, alpha: a)
     }
-    
-
 }

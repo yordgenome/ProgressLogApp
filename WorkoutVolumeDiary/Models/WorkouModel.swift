@@ -7,8 +7,6 @@
 
 import UIKit
 import FirebaseFirestore
-import SwiftUI
-
 
 struct WorkoutModel {
     var doneAt: Timestamp = Timestamp(date: Date())
@@ -45,45 +43,3 @@ struct WorkoutModel {
         ]
     }
 }
-
-
-
-//public enum TargetPart {
-//    case chest
-//    case back
-//    case arm
-//    case shoulder
-//    case abs
-//    case leg
-//    case others
-//
-//    public func toString() -> String {
-//            switch self {
-//            case .chest: return "胸"
-//            case .shoulder: return "肩"
-//            case .back: return "背"
-//            case .arm: return "腕"
-//            case .abs: return "腹"
-//            case .leg: return "脚"
-//            case .others: return "他"
-//            }
-//    }
-//}
-//
-//class TargetPartUtils {
-//
-//    class func toTargetPart(_ targetPart: String) -> TargetPart {
-//        switch targetPart {
-//        case "胸": return .chest
-//        case "肩": return .shoulder
-//        case "背": return .back
-//        case "腕": return .arm
-//        case "腹": return .abs
-//        case "脚": return .leg
-//        case "他": return .others
-//        default: return .others
-//        }
-//    }
-//}
-
-

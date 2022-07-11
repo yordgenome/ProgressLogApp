@@ -22,7 +22,7 @@ protocol SetWorkoutViewModelOutputs {
     var repsTextOutput: PublishSubject<String> { get }
 }
 
-
+// WorkoutViewControllerのSetWorkoutViewのvalidation
 class SetworkoutViewModel: SetWorkoutViewModelInputs, SetWorkoutViewModelOutputs{
     
     private let disposeBag = DisposeBag()

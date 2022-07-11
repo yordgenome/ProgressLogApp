@@ -19,7 +19,7 @@ protocol LoginViewModelOutputs {
     var passwordTextOutput: PublishSubject<String> { get }
 }
 
-
+// LoginViewControllerのvalidation
 class LoginViewModel: LoginViewModelInputs, LoginViewModelOutputs{
     
     private let disposeBag = DisposeBag()

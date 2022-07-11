@@ -21,7 +21,7 @@ protocol RegisterViewModelOutputs {
     var passwordTextOutput: PublishSubject<String> { get }
 }
 
-
+// RegisterViewControllerのvalidation
 class RegisterViewModel: RegisterViewModelInputs, RegisterViewModelOutputs{
     
     private let disposeBag = DisposeBag()
