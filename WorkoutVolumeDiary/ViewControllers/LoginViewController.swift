@@ -142,8 +142,6 @@ final class LoginViewController: UIViewController {
     }
 }
 
-
-
 //MARK: - UITextFieldDelegate
 
 extension LoginViewController: UITextFieldDelegate {
